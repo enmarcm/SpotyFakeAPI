@@ -85,7 +85,14 @@ export interface SearchRelationsParams<T> {
   transform?: (doc: any) => any;
 }
 
-
+export interface FetchoParams {
+  url: string;
+  method?: HttpMethod;
+  body?: any;
+  token?: string;
+  isCors?: boolean;
+  headers?: Record<string, string>;
+}
 
 export interface HostConfig {
   host: string;
@@ -162,5 +169,8 @@ export interface GenerateTokenData {
   email: string;
 }
 
-
-
+export interface SpotifyData {
+  CLIENT_ID: string;
+  CLIENT_SECRET: string;
+  REDIRECT_URI: string;
+}

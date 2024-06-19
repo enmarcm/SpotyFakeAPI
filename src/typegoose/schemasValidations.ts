@@ -1,5 +1,3 @@
-import { Ref } from "@typegoose/typegoose";
-import { Contact } from "./schemasDefinitions";
 
 export class UserValidations {
   static userNameValidate = () => ({
@@ -24,10 +22,6 @@ export class UserValidations {
     message: "Date of birth must be a valid date.",
   });
 
-  static contactsValidate = () => ({
-    validator: (v: Ref<Contact>[]) => Array.isArray(v),
-    message: "Contacts must be an array.",
-  });
 }
 
 export class GroupValidation {

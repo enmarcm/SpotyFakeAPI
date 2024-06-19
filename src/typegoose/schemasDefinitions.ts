@@ -1,10 +1,7 @@
-import { prop, Ref } from "@typegoose/typegoose";
+import { prop } from "@typegoose/typegoose";
 import {
-  ContactValidations,
-  GroupValidation,
   UserValidations,
 } from "./schemasValidations";
-import { Constants } from "../enums";
 
 export class User {
   @prop({
@@ -59,7 +56,6 @@ export class User {
   @prop({ required: false, type: Boolean, default: false })
   public active!: boolean;
 }
-
 
 export class ActivateCode {
   @prop({ required: true, type: String })
