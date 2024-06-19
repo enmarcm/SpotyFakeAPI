@@ -60,12 +60,13 @@ class SpotifyAPIManager {
     };
   }
 
-  public async getSongByName({ name }: { name: string }) {
+  public async getSongByName({ name, limit = 20, offset = 0, include_external = 'audio' }: { name: string, limit?: number, offset?: number, include_external?: string }) {
     await this.verifyTokenValid();
 
     try {
+      const url = `${URLS.SPOTIFY_SEARCH}?q=${encodeURIComponent(name)}&type=track&limit=${limit}&offset=${offset}&include_external=${include_external}`;
       const response = (await fetcho({
-        url: `${URLS.SPOTIFY_SEARCH}?q=${name}&type=track`,
+        url: url,
         method: "GET",
         headers: this.headers,
       })) as any;

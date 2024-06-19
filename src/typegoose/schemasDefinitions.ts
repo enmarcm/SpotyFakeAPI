@@ -67,6 +67,9 @@ export class ActivateCode {
 
 export class Artist {
   @prop({ required: true, type: String })
+  public _id!: string;
+
+  @prop({ required: true, type: String })
   public name!: string;
 
   @prop({ required: true, type: Date })
@@ -82,6 +85,9 @@ export class Subscription {
 }
 
 export class Song {
+  @prop({ required: true, type: String })
+  public _id!: string;
+
   @prop({ ref: () => Artist, required: false, type: [String] })
   public idArtist!: Ref<Artist>[];
 
@@ -110,6 +116,9 @@ export class Like {
 }
 
 export class Album {
+  @prop({ required: true, type: String })
+  public _id!: string;
+
   @prop({ required: true, type: Date })
   public year!: Date;
 

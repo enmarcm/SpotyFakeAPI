@@ -6,9 +6,8 @@ class SongsController {
     try {
       const { songName } = req.params;
 
-      if (!songName) {
-        return res.status(400).json({ error: "Song name is required" });
-      }
+      if (!songName) return res.status(400).json({ error: "Song name is required" });
+      
 
       const songs = await SongsModel.getSongByName({ name: songName });
 

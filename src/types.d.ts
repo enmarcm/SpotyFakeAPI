@@ -175,3 +175,29 @@ export interface SpotifyData {
   CLIENT_SECRET: string;
   REDIRECT_URI: string;
 }
+
+
+export interface SongType {
+  id: string;
+  artists: { id: string; name: string }[];
+  name: string;
+  duration_ms: number;
+  album: {
+    images: { url: string }[];
+    release_date: string;
+  };
+  external_urls: {
+    spotify: string;
+  };
+}
+
+export interface MappedSongType {
+  _id: string;
+  idArtist: string;
+  artistNames: string[];
+  name: string;
+  duration: number;
+  urlImage: string;
+  urlSong: string;
+  date: string;
+}
