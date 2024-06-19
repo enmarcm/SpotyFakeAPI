@@ -1,7 +1,6 @@
-import { prop } from "@typegoose/typegoose";
-import {
-  UserValidations,
-} from "./schemasValidations";
+//TODO: AGREGAR VALIDACIONES QUE YA SE CREAERON
+import { prop, Ref } from "@typegoose/typegoose";
+import { UserValidations } from "./schemasValidations";
 
 export class User {
   @prop({
@@ -69,4 +68,79 @@ export class ActivateCode {
 
   @prop({ expires: 12000, type: Date })
   public expireAt?: Date;
+}
+
+export class Artist {
+  @prop({ required: true, type: String })
+  public name!: string;
+
+  @prop({ required: true, type: Date })
+  public dateOfJoin!: Date;
+}
+
+export class Subscription {
+  @prop({ ref: () => Artist, required: true, type: String })
+  public idArtist!: Ref<Artist>;
+
+  @prop({ ref: () => User, required: true, type: String })
+  public idUser!: Ref<User>;
+}
+
+export class Song {
+  @prop({ ref: () => Artist, required: true, type: [String] })
+  public idArtist!: Ref<Artist>[];
+
+  @prop({ required: true, type: String })
+  public name!: string;
+
+  @prop({ required: true, type: Number })
+  public duration!: number;
+
+  @prop({ required: true, type: Date })
+  public date!: Date;
+
+  @prop({ required: true, type: String })
+  public urlImage!: string;
+
+  @prop({ required: true, type: String })
+  public urlSong!: string;
+}
+
+export class Like {
+  @prop({ ref: () => User, required: true, type: String })
+  public idUser!: Ref<User>;
+
+  @prop({ ref: () => Song, required: true, type: String })
+  public idSong!: Ref<Song>;
+}
+
+export class Album {
+  @prop({ required: true, type: Date })
+  public year!: Date;
+
+  @prop({ ref: () => Song, required: true, type: [String] })
+  public songs!: Ref<Song>[];
+
+  @prop({ ref: () => Artist, required: true, type: [String] })
+  public idArtist!: Ref<Artist>[];
+}
+
+export class Playlist {
+  @prop({ ref: () => Song, required: true, type: [String] })
+  public idSongs!: Ref<Song>[];
+
+  @prop({ ref: () => User, required: true, type: String })
+  public idUser!: Ref<User>;
+
+  @prop({ required: true, type: String })
+  public name!: string;
+
+  @prop({ required: false, type: String })
+  public description!: string;
+
+  @prop({ required: true, type: String })
+  public urlQr!: string;
+
+  @prop({ required: true, type: String })
+  public type!: string;
 }

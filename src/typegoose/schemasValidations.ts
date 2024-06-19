@@ -1,4 +1,3 @@
-
 export class UserValidations {
   static userNameValidate = () => ({
     validator: (v: string) => /^[a-zA-Z0-9]{6,10}$/.test(v),
@@ -21,44 +20,45 @@ export class UserValidations {
     validator: (v: any) => !isNaN(new Date(v).getTime()),
     message: "Date of birth must be a valid date.",
   });
-
 }
 
-export class GroupValidation {
+export class ArtistValidations {
   static nameValidate = () => ({
-    validator: (v: string) => /^[a-zA-Z0-9\s]{1,20}$/.test(v),
-    message:
-      "Name must be 1-20 characters long and contain only letters, numbers, and spaces.",
+    validator: (v: string) => /^[a-zA-Z\s]{3,50}$/.test(v),
+    message: "Name must be 3-50 characters long and contain only letters.",
   });
 
-  static descriptionValidate = () => ({
-    validator: (v: string) => /^[a-zA-Z0-9\s]{1,200}$/.test(v),
-    message: "Description must be 1-200 characters long and contain only letters, numbers, and spaces.",
+  static dateOfJoinValidate = () => ({
+    validator: (v: any) => !isNaN(new Date(v).getTime()),
+    message: "Date of join must be a valid date.",
   });
 }
 
-export class ContactValidations {
+export class SongValidations {
   static nameValidate = () => ({
-    validator: (v: string) => /^[a-zA-Z0-9\s]{1,30}$/.test(v),
-    message:
-      "Name must be 1-30 characters long and contain only letters, numbers, and spaces.",
+    validator: (v: string) => v.length >= 2 && v.length <= 100,
+    message: "Name must be between 2 and 100 characters long.",
   });
 
-  static emailValidate = () => ({
-    validator: (v: string) => /\S+@\S+\.\S+/.test(v),
-    message: "Email is not valid!",
+  static durationValidate = () => ({
+    validator: (v: number) => v > 0 && v < 3600,
+    message: "Duration must be between 0 and 3600 seconds.",
   });
+}
 
-  static numberValidate = () => ({
-    validator: (v: Array<string>) =>
-      v.length > 0 && v.every((num) => /^(\+?\d{1,4})?(\(?\d{1,4}\)?[\s-]?)?[\d\s-]{3,10}(\*?\d+)?$/.test(num)),
-    message:
-      "Each number must be a valid phone number and there must be at least one number.",
+export class AlbumValidations {
+  static yearValidate = () => ({
+    validator: (v: any) =>
+      !isNaN(new Date(v).getTime()) &&
+      new Date(v).getFullYear() >= 1900 &&
+      new Date(v).getFullYear() <= new Date().getFullYear(),
+    message: "Year must be a valid year between 1900 and the current year.",
   });
+}
 
-  static imageValidate = () => ({
-    validator: (v: string) =>
-      /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(v),
-    message: "Image must be a valid URL.",
+export class PlaylistValidations {
+  static nameValidate = () => ({
+    validator: (v: string) => v.length >= 2 && v.length <= 100,
+    message: "Name must be between 2 and 100 characters long.",
   });
 }

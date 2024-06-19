@@ -38,17 +38,15 @@ const fetcho = ({
         res.on("end", () => {
           try {
             const parsedData = JSON.parse(data);
-            if (
-              res.statusCode &&
-              res.statusCode >= 200 &&
-              res.statusCode <= 299
-            ) {
-              resolve(parsedData);
-            } else {
+
+            if (!parsedData) reject(new Error("Error parsing response"));
+
+            if (res.statusCode === 500 || res.statusCode === 404)
               reject(
-                new Error(`Request failed with status code ${res.statusCode}`)
+                new Error(`Server error with status code ${res.statusCode}`)
               );
-            }
+
+            resolve(parsedData);
           } catch (error) {
             reject(new Error(`Error parsing response: ${error}`));
           }
@@ -64,7 +62,11 @@ const fetcho = ({
         method === HttpMethod.PUT ||
         method === HttpMethod.PATCH)
     ) {
-      req.write(JSON.stringify(body));
+      if (headers["Content-Type"] === "application/x-www-form-urlencoded") {
+        req.write(body);
+      } else {
+        req.write(JSON.stringify(body));
+      }
     }
 
     req.end();

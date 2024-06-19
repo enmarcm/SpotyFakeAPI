@@ -18,8 +18,8 @@ export const Hosts: Record<string, HostConfig> = {
 };
 
 const SPOTIFY_DATA: SpotifyData = {
-  CLIENT_ID: process.env.SPOTIFY_CLIENT_ID || "",
-  CLIENT_SECRET: process.env.SPOTIFY_CLIENT_SECRET || "",
+  CLIENT_ID: process.env.CLIENT_ID_SPOTIFY || "",
+  CLIENT_SECRET: process.env.CLIENT_SECRET_SPOTIFY || "",
   REDIRECT_URI: process.env.SPOTIFY_REDIRECT_URI || "",
 };
 

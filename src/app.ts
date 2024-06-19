@@ -10,6 +10,8 @@ import {
   midValidJson,
   midErrorHandler,
 } from "./middlewares/middlewares";
+import R from "./routers/allRouters";
+import { Routes } from "./enums";
 
 const app = express();
 
@@ -21,7 +23,7 @@ app.use(midNotJson);
 app.use(midConnectDB);
 
 //{ Routes
-
+app.use(Routes.MAIN, R.mainRouter);
 
 app.use(midErrorHandler);
 app.use(midNotFound);
