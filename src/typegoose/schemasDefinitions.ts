@@ -1,4 +1,5 @@
 //TODO: AGREGAR VALIDACIONES QUE YA SE CREAERON
+//TODO: AL USUARIO LE FALTA EL ROL
 import { prop, Ref } from "@typegoose/typegoose";
 import { UserValidations } from "./schemasValidations";
 
@@ -37,14 +38,8 @@ export class User {
   })
   public dateOfBirth!: Date;
 
-  // @prop({
-  //   required: false,
-  //   ref: () => "Contact",
-  //   type: () => [Schema.Types.ObjectId],
-  //   validate: UserValidations.contactsValidate(),
-  //   default: () => [],
-  // })
-  // public contacts!: Ref<Contact>[];
+  @prop({ required: false, type: String, default: "user" })
+  public role!: string;
 
   @prop({ required: false, type: Number, default: 3 })
   public attempts!: number;
@@ -87,7 +82,7 @@ export class Subscription {
 }
 
 export class Song {
-  @prop({ ref: () => Artist, required: true, type: [String] })
+  @prop({ ref: () => Artist, required: false, type: [String] })
   public idArtist!: Ref<Artist>[];
 
   @prop({ required: true, type: String })

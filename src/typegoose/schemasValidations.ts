@@ -1,8 +1,8 @@
 export class UserValidations {
   static userNameValidate = () => ({
-    validator: (v: string) => /^[a-zA-Z0-9]{6,10}$/.test(v),
+    validator: (v: string) => /^[a-zA-Z0-9ñÑáéíóúÁÉÍÓÚüÜ]{6,10}$/.test(v),
     message:
-      "Username must be 6-10 characters long and contain only letters and numbers.",
+      "Username must be 6-10 characters long and contain only letters and numbers, including accents and Ñ.",
   });
 
   static emailValidate = () => ({
@@ -24,8 +24,8 @@ export class UserValidations {
 
 export class ArtistValidations {
   static nameValidate = () => ({
-    validator: (v: string) => /^[a-zA-Z\s]{3,50}$/.test(v),
-    message: "Name must be 3-50 characters long and contain only letters.",
+    validator: (v: string) => /^[a-zA-Z\sñÑáéíóúÁÉÍÓÚüÜ]{3,50}$/.test(v),
+    message: "Name must be 3-50 characters long and contain only letters, including accents and Ñ.",
   });
 
   static dateOfJoinValidate = () => ({

@@ -8,6 +8,7 @@ interface Request extends ExpressRequest {
   idUser?: string;
   username?: string;
   email?: string;
+  role?: string;
 }
 
 export default async function midToken(
@@ -41,6 +42,7 @@ export default async function midToken(
     req.idUser = user.id;
     req.username = user.userName;
     req.email = user.email;
+    req.role = user.role;
 
     return next();
   } catch (error) {

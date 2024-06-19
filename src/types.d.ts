@@ -154,6 +154,7 @@ export interface UserInterface {
   blocked: boolean;
   active: boolean;
   dateOfBirth: Date;
+  role?: string;
 }
 
 type ErrorHandler = (res: Response, message?: string) => void;

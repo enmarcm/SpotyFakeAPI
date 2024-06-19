@@ -24,6 +24,7 @@ app.use(midConnectDB);
 
 //{ Routes
 app.use(Routes.MAIN, R.mainRouter);
+app.use(Routes.SONGS, R.songRouter);
 
 app.use(midErrorHandler);
 app.use(midNotFound);

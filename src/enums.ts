@@ -3,6 +3,7 @@ import { BASE_URL } from "./constants";
 export enum Routes {
   MAIN = "/",
   AUTH = "/auth",
+  SONGS = "/songs",
 }
 
 export const URLS = {
