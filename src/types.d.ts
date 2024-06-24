@@ -189,6 +189,7 @@ export interface SongType {
   external_urls: {
     spotify: string;
   };
+  genres: string[] | string;
 }
 
 export interface MappedSongType {

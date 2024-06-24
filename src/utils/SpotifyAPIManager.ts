@@ -96,38 +96,59 @@ class SpotifyAPIManager {
     }
   }
 
-  public async getSongsByGenres({
-    genres,
-    limit = 20,
-    offset = 0,
-    include_external = "audio",
+  public async getSongByGenre({
+    genre,
+    artistLimit = 5,
+    trackLimit = 10,
   }: {
-    genres: string[];
-    limit?: number;
-    offset?: number;
-    include_external?: string;
+    genre: string;
+    artistLimit?: number;
+    trackLimit?: number;
   }) {
     await this.verifyTokenValid();
 
     try {
-      // Unimos los géneros con OR para la búsqueda
-      const genresQuery = genres.map(genre => `genre:${encodeURIComponent(genre)}`).join(" OR ");
-      const url = `${URLS.SPOTIFY_SEARCH}?q=${genresQuery}&type=track&limit=${limit}&offset=${offset}&include_external=${include_external}`;
-
-      const response = (await fetcho({
-        url: url,
+      // Paso 1: Buscar artistas por género
+      const artistSearchUrl = `${
+        URLS.SPOTIFY_SEARCH
+      }?q=genre:${encodeURIComponent(genre)}&type=artist&limit=${artistLimit}`;
+      const artistResponse = (await fetcho({
+        url: artistSearchUrl,
         method: "GET",
         headers: this.headers,
       })) as any;
 
-      if (response?.error) throw new Error(response?.error);
+      if (artistResponse?.error) throw new Error(artistResponse?.error);
+      if (
+        !artistResponse ||
+        !artistResponse.artists ||
+        !artistResponse.artists.items
+      )
+        throw new Error("Error fetching artists by genre");
 
-      if (!response || !response.tracks)
-        throw new Error("Error fetching songs by genres");
+      // Paso 2: Obtener las canciones más populares de los artistas encontrados
+      const tracks = [];
+      for (const artist of artistResponse.artists.items) {
+        const topTracksUrl = `${URLS.SPOTIFY_ARTISTS}/${artist.id}/top-tracks?market=US`;
+        const topTracksResponse = (await fetcho({
+          url: topTracksUrl,
+          method: "GET",
+          headers: this.headers,
+        })) as any;
 
-      return response.tracks;
+        if (topTracksResponse?.error) throw new Error(topTracksResponse?.error);
+
+        if (!topTracksResponse || !topTracksResponse.tracks)
+          throw new Error(
+            `Error fetching top tracks for artist ${artist.name}`
+          );
+
+        tracks.push(...topTracksResponse.tracks.slice(0, trackLimit));
+      }
+
+      return tracks;
     } catch (error) {
-      console.error("Error fetching songs by genres:", error);
+      console.error("Error fetching songs by genre:", error);
       throw error;
     }
   }
@@ -242,23 +263,40 @@ class SpotifyAPIManager {
     }
   }
 
-  public fetchGenreForSong = async (song: any) => {
-    const artistIds = song.artists.map((artist: any) => artist.id);
+  public async fetchGenreForSong(songId: string): Promise<string[]> {
+    await this.verifyTokenValid(); // Asegurar que el token es válido
+  
+    try {
 
-    const genresPromises = artistIds.map(async (id: string) => {
-      const result = await this.getArtistById({ id });
-      if (Array.isArray(result)) {
-        return result.flatMap((artist) => (artist.genres ? artist.genres : []));
-      } else {
-        return result && result.genres ? result.genres : [];
+      const songDetailsResponse = await fetcho({
+        url: `${URLS.SPOTIFY_TRACKS}/${songId}`,
+        method: "GET",
+        headers: this.headers,
+      }) as any;
+  
+      if (!songDetailsResponse || !songDetailsResponse.artists || songDetailsResponse.artists.length === 0) {
+        throw new Error("No artist information found for song");
       }
-    });
-
-    const genresArrays = await Promise.all(genresPromises);
-    const genres = genresArrays.flat();
-
-    return genres;
-  };
+  
+      const artistId = songDetailsResponse.artists[0].id; // Asumiendo el primer artista
+  
+      // Paso 2: Obtener detalles del artista para extraer los géneros
+      const artistDetailsResponse = await fetcho({
+        url: `${URLS.SPOTIFY_ARTISTS}/${artistId}`,
+        method: "GET",
+        headers: this.headers,
+      }) as any;
+  
+      if (!artistDetailsResponse || !artistDetailsResponse.genres) {
+        throw new Error("No genre information found for artist");
+      }
+  
+      return artistDetailsResponse.genres; // Devolver los géneros del artista
+    } catch (error) {
+      console.error("Error fetching genre for song:", error);
+      throw error;
+    }
+  }
 }
 
 export default SpotifyAPIManager;

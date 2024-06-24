@@ -9,11 +9,13 @@ import {
 } from "../types";
 
 class SongsModel {
-  static async addSongsApiToDBByGenre({
+  static async addSongsApiToDB({
+    name,
     genres,
     limit = 10,
   }: {
-    genres: string[];
+    name?: string;
+    genres?: string[];
     limit?: number;
   }): Promise<SongType[]> {
     let newSongsFound = 0;
@@ -21,34 +23,55 @@ class SongsModel {
     const maxLimit = 50;
 
     try {
-      // Assuming ITSGooseHandler can handle multiple genres, otherwise, you'll need to adjust this part as well
+      const condition = name
+        ? { name: { $regex: name.replace("%", " "), $options: "i" } }
+        : { genres: { $in: genres } };
+
       const songs = await ITSGooseHandler.searchAll({
         Model: SongModel,
-        condition: {
-          genre: { $in: genres.map((genre) => new RegExp(genre, "i")) },
-        },
+        condition,
       });
 
       let mappedSongs = (
         Array.isArray(songs) ? songs : songs ? [songs] : []
       ) as SongType[];
 
-      const newSongsArray = [] as any;
+      const newSongsArray = [];
       while (newSongsFound < 5 && limit <= maxLimit) {
-        const spotifySongs = await SongsModel.fetchSpotifySongs({
-          genres, // Pass the genres array directly
-          limit,
-        });
+        let spotifySongs = [];
+
+        if (name) {
+          spotifySongs = await this.fetchSpotifySongs({ name, limit });
+
+        } else if (genres && genres.length > 0) {
+
+          for (const genre of genres) {
+            const genreSongs = await this.fetchSpotifySongs({
+              genre: genre,
+              limit,
+            });
+
+            spotifySongs.push(...genreSongs);
+          }
+
+        }
         const newSongs = this.filterNewSongs(spotifySongs, mappedSongs);
 
         if (newSongs.length > 0) {
           await this.addNewSongsToDB(newSongs);
           mappedSongs = [...mappedSongs, ...newSongs];
           newSongsFound += newSongs.length;
+        } else {
+          break;
         }
 
         if (newSongsFound < 5) {
           limit += initialLimit;
+        }
+
+        // Asegurarse de que limit no exceda maxLimit
+        if (limit > maxLimit) {
+          limit = maxLimit;
         }
 
         const mappedSongsFormatPromises = newSongs.map((song) =>
@@ -58,67 +81,10 @@ class SongsModel {
         const resolvedMappedSongs = await Promise.all(
           mappedSongsFormatPromises
         );
-
         newSongsArray.push(...resolvedMappedSongs);
       }
 
-      return newSongsArray;
-    } catch (error) {
-      console.error(error);
-      return [];
-    }
-  }
-
-  static async addSongsApiToDB({
-    name,
-    limit = 10,
-  }: {
-    name: string;
-    limit?: number;
-  }): Promise<SongType[]> {
-    let newSongsFound = 0;
-    const initialLimit = limit;
-    const maxLimit = 50;
-
-    const parsedName = name.replace("%", " ");
-
-    try {
-      const songs = await ITSGooseHandler.searchAll({
-        Model: SongModel,
-        condition: { name: { $regex: parsedName, $options: "i" } },
-      });
-
-      let mappedSongs = (
-        Array.isArray(songs) ? songs : songs ? [songs] : []
-      ) as SongType[];
-
-      const newSongsArray = [] as any;
-      while (newSongsFound < 5 && limit <= maxLimit) {
-        const spotifySongs = await this.fetchSpotifySongs({ name, limit });
-        const newSongs = this.filterNewSongs(spotifySongs, mappedSongs);
-
-        if (newSongs.length > 0) {
-          await this.addNewSongsToDB(newSongs);
-          mappedSongs = [...mappedSongs, ...newSongs];
-          newSongsFound += newSongs.length;
-        }
-
-        if (newSongsFound < 5) {
-          limit += initialLimit;
-        }
-
-        const mappedSongsFormatPromises = newSongs.map((song) =>
-          this.mapSongData(song)
-        );
-
-        const resolvedMappedSongs = await Promise.all(
-          mappedSongsFormatPromises
-        );
-
-        newSongsArray.push(...resolvedMappedSongs);
-      }
-
-      return newSongsArray;
+      return newSongsArray as any;
     } catch (error) {
       console.error(error);
       return [];
@@ -188,28 +154,94 @@ class SongsModel {
     }
   }
 
+  static async getSongByGenre({
+    genres,
+    page = 1,
+    limit = 5,
+  }: {
+    genres: string[];
+    page?: number;
+    limit?: number;
+  }) {
+    try {
+      const mapPage = Math.max(page, 1);
+      const mapLimit = Math.max(limit, 1);
+
+      const offset = (mapPage - 1) * mapLimit;
+
+      let songs = await ITSGooseHandler.searchAll({
+        Model: SongModel,
+        condition: {
+          genre: { $in: genres.map((genre) => new RegExp(genre, "i")) },
+        },
+        limit: mapLimit,
+        offset,
+      });
+
+      let mappedSongs: any = Array.isArray(songs)
+        ? songs
+        : songs
+        ? [songs]
+        : [];
+
+      if (mappedSongs.length < mapLimit) {
+        const totalSongsNeeded = mapPage * mapLimit;
+        const additionalSongsNeeded =
+          totalSongsNeeded - (songs ? songs.length : 0);
+
+        const newSongs = await this.addSongsApiToDB({
+          genres,
+          limit: additionalSongsNeeded,
+        });
+
+        if (mapPage === 1) {
+          mappedSongs = [...mappedSongs, ...newSongs.slice(0, mapLimit)];
+        } else {
+          const effectiveOffset = Math.max(
+            0,
+            additionalSongsNeeded - (mapPage - 1) * mapLimit
+          );
+
+          mappedSongs = newSongs?.slice(
+            effectiveOffset,
+            effectiveOffset + mapLimit
+          );
+        }
+      }
+
+      return mappedSongs;
+    } catch (error) {
+      console.error(error);
+      throw new Error(
+        `An error occurred while searching for songs by genre. Error: ${error}`
+      );
+    }
+  }
+
   private static async fetchSpotifySongs(options: {
     name?: string;
-    genres?: string[];
+    genre?: string;
     limit: number;
   }): Promise<SongType[]> {
+    console.log(options);
+
     let response;
     if (options.name) {
       response = await ISpotifyAPIManager.getSongByName({
         name: options.name,
         limit: options.limit,
       });
-    } else if (options.genres) {
-      // Asegúrate de que genres es un array antes de pasarlo
-      response = await ISpotifyAPIManager.getSongsByGenres({
-        genres: options.genres,
-        limit: options.limit,
+    } else if (options.genre) {
+      response = await ISpotifyAPIManager.getSongByGenre({
+        genre: options.genre,
+        artistLimit: options.limit,
+        trackLimit: options.limit,
       });
     } else {
-      // Manejar el caso en que ni el nombre ni los géneros son proporcionados
       return [];
     }
-    return response?.items || [];
+
+    return response || [];
   }
 
   private static filterNewSongs(
@@ -260,7 +292,7 @@ class SongsModel {
       return;
     }
 
-    const genres = await ISpotifyAPIManager.fetchGenreForSong(song);
+    const genres = await ISpotifyAPIManager.fetchGenreForSong(song.id);
 
     const newSong = {
       _id: song?.id,
@@ -280,72 +312,6 @@ class SongsModel {
     };
 
     return newSong;
-  }
-
-  static async getSongsByGenre({
-    genre,
-    page = 1,
-    limit = 5,
-  }: {
-    genre: string;
-    page?: number;
-    limit?: number;
-  }) {
-    try {
-      const mapPage = Math.max(page, 1);
-      const mapLimit = Math.max(limit, 1);
-
-      const offset = (mapPage - 1) * mapLimit;
-
-      let songs = await ITSGooseHandler.searchAll({
-        Model: SongModel,
-        condition: { genre: { $regex: genre, $options: "i" } },
-        limit: mapLimit,
-        offset,
-      });
-
-      let mappedSongs: any = Array.isArray(songs)
-        ? songs
-        : songs
-        ? [songs]
-        : [];
-
-      if (mappedSongs.length < mapLimit) {
-        const totalSongsNeeded = mapPage * mapLimit;
-        const additionalSongsNeeded =
-          totalSongsNeeded - (songs ? songs.length : 0);
-        const newSongs = await this.addSongsApiToDB({
-          name: genre,
-          limit: additionalSongsNeeded,
-        });
-
-        if (mapPage === 1) {
-          mappedSongs = [...mappedSongs, ...newSongs.slice(0, mapLimit)];
-        } else {
-          const effectiveOffset = Math.max(
-            0,
-            additionalSongsNeeded - (mapPage - 1) * mapLimit
-          );
-
-          mappedSongs = newSongs?.slice(
-            effectiveOffset,
-            effectiveOffset + mapLimit
-          );
-        }
-      }
-
-      return mappedSongs;
-    } catch (error) {
-      console.error(error);
-      throw new Error(
-        `An error occurred while searching for the song by genre. Error: ${error}`
-      );
-    }
-  }
-
-  //TODO:
-  static async getSongByAlbum({ idAlbum }: { idAlbum: string }) {
-    console.log(idAlbum);
   }
 
   //TODO:

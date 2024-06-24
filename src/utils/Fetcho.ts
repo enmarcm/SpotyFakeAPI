@@ -11,6 +11,8 @@ const fetcho = ({
 }: FetchoParams): Promise<Record<string, any> | false> => {
   const urlObj = new URL(url);
 
+  console.log(url)
+
   const defaultHeaders = {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -36,15 +38,20 @@ const fetcho = ({
           data += chunk;
         });
         res.on("end", () => {
+          if (data === "") {
+            reject(new Error("Empty response from server"));
+            return;
+          }
+
           try {
             const parsedData = JSON.parse(data);
 
-            if (!parsedData) reject(new Error("Error parsing response"));
+            if(!res.statusCode) return
 
-            if (res.statusCode === 500 || res.statusCode === 404)
-              reject(
-                new Error(`Server error with status code ${res.statusCode}`)
-              );
+            if (res.statusCode < 200 || res.statusCode >= 300) {
+              reject(new Error(`Server error with status code ${res.statusCode}`));
+              return;
+            }
 
             resolve(parsedData);
           } catch (error) {
@@ -53,6 +60,7 @@ const fetcho = ({
         });
       })
       .on("error", (error) => {
+        console.log(url)
         reject(error);
       });
 

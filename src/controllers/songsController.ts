@@ -69,8 +69,10 @@ class SongsController {
 
       if (!genre) return res.status(400).json({ error: "Genre is required" });
 
-      const songs = await SongsModel.getSongsByGenre({
-        genre,
+      const newGenre = [genre]
+
+      const songs = await SongsModel.getSongByGenre({
+        genres: newGenre,
         page,
         limit,
       });
