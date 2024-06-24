@@ -5,4 +5,7 @@ const songRouter = Router();
 
 songRouter.get("/:songName", SongsController.getSongByName);
 
+songRouter.post("/getByGenre", SongsController.getSongsByGenre)
+
+
 export default songRouter;

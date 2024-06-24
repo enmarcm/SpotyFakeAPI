@@ -1,10 +1,10 @@
 import "dotenv/config";
-import TSGooseHandler from "../components/TSGooseHandler";
+import TSGooseHandler from "../utils/TSGooseHandler";
 import MailerConfigJson from "./jsons/mailerConfig.json";
-import Mailer from "../components/Mailer";
+import Mailer from "../utils/Mailer";
 import { MailerConfig } from "../types";
-import JWTManager from "../components/JWTManager";
-import SpotifyAPIManager from "../components/SpotifyAPIManager";
+import JWTManager from "../utils/JWTManager";
+import SpotifyAPIManager from "../utils/SpotifyAPIManager";
 
 const connectionString = process.env.ConnectionString as string | "";
 

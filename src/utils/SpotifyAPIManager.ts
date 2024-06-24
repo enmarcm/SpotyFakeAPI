@@ -2,8 +2,8 @@ import fetcho from "./Fetcho";
 import { BODY_FETCH_SPOTIFY, CONTENT_TYPE_SPOTIFY } from "../constants";
 import { URLS } from "../enums";
 
-
 //TODO: MAPEAR TODA LA INFORMACION QUE SE OBTIENE DE SPOTIFY
+//TODO: GUARDAR TOKEN EN BD
 
 class SpotifyAPIManager {
   private accessToken: string | null = null;
@@ -60,11 +60,24 @@ class SpotifyAPIManager {
     };
   }
 
-  public async getSongByName({ name, limit = 20, offset = 0, include_external = 'audio' }: { name: string, limit?: number, offset?: number, include_external?: string }) {
+  public async getSongByName({
+    name,
+    limit = 20,
+    offset = 0,
+    include_external = "audio",
+  }: {
+    name: string;
+    limit?: number;
+    offset?: number;
+    include_external?: string;
+  }) {
     await this.verifyTokenValid();
 
     try {
-      const url = `${URLS.SPOTIFY_SEARCH}?q=${encodeURIComponent(name)}&type=track&limit=${limit}&offset=${offset}&include_external=${include_external}`;
+      const url = `${URLS.SPOTIFY_SEARCH}?q=${encodeURIComponent(
+        name
+      )}&type=track&limit=${limit}&offset=${offset}&include_external=${include_external}`;
+
       const response = (await fetcho({
         url: url,
         method: "GET",
@@ -79,6 +92,42 @@ class SpotifyAPIManager {
       return response.tracks;
     } catch (error) {
       console.error("Error fetching song by name:", error);
+      throw error;
+    }
+  }
+
+  public async getSongsByGenres({
+    genres,
+    limit = 20,
+    offset = 0,
+    include_external = "audio",
+  }: {
+    genres: string[];
+    limit?: number;
+    offset?: number;
+    include_external?: string;
+  }) {
+    await this.verifyTokenValid();
+
+    try {
+      // Unimos los géneros con OR para la búsqueda
+      const genresQuery = genres.map(genre => `genre:${encodeURIComponent(genre)}`).join(" OR ");
+      const url = `${URLS.SPOTIFY_SEARCH}?q=${genresQuery}&type=track&limit=${limit}&offset=${offset}&include_external=${include_external}`;
+
+      const response = (await fetcho({
+        url: url,
+        method: "GET",
+        headers: this.headers,
+      })) as any;
+
+      if (response?.error) throw new Error(response?.error);
+
+      if (!response || !response.tracks)
+        throw new Error("Error fetching songs by genres");
+
+      return response.tracks;
+    } catch (error) {
+      console.error("Error fetching songs by genres:", error);
       throw error;
     }
   }
@@ -142,7 +191,7 @@ class SpotifyAPIManager {
       if (!response || !response.artists)
         throw new Error("Error fetching artist by ID");
 
-      return response.artists;
+      return response.artists.items;
     } catch (error) {
       console.error("Error fetching artist by ID:", error);
       throw error;
@@ -192,6 +241,24 @@ class SpotifyAPIManager {
       throw error;
     }
   }
+
+  public fetchGenreForSong = async (song: any) => {
+    const artistIds = song.artists.map((artist: any) => artist.id);
+
+    const genresPromises = artistIds.map(async (id: string) => {
+      const result = await this.getArtistById({ id });
+      if (Array.isArray(result)) {
+        return result.flatMap((artist) => (artist.genres ? artist.genres : []));
+      } else {
+        return result && result.genres ? result.genres : [];
+      }
+    });
+
+    const genresArrays = await Promise.all(genresPromises);
+    const genres = genresArrays.flat();
+
+    return genres;
+  };
 }
 
 export default SpotifyAPIManager;

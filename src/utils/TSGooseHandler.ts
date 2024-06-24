@@ -201,18 +201,24 @@ class TSGooseHandler implements TSGooseHandlerProps {
     transform,
     limit = 10,
     offset = 0,
-  }: SearchAll<T> & { limit?: number; offset?: number }) {
+    condition = {},
+  }: SearchAll<T> & {
+    limit?: number;
+    offset?: number;
+    condition?: any;
+    transform?: any;
+  }): Promise<Array<T>> {
     try {
-      const documents = await Model.find({}, transform, {
+      const documents = await Model.find(condition, transform, {
         skip: offset,
         limit: limit,
       });
       return documents;
     } catch (error) {
       console.error(error);
-      return {
-        error: `Error searching for all documents in model ${Model.modelName}`,
-      };
+      throw new Error(
+        `Error searching for all documents in model ${Model.modelName}: ${error}`
+      );
     }
   }
 

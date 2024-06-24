@@ -1,7 +1,7 @@
 import { ActivateCodeModel, UserModel } from "../typegoose/models";
 import { IJWTManager, ITSGooseHandler } from "../data/instances";
 import { AddActivateCodeParams, RegisterUser, UserInterface } from "../types";
-import CryptManager from "../components/CryptManager";
+import CryptManager from "../utils/CryptManager";
 
 class UserModelClass {
   static async deleteAccount({ idUser }: { idUser: string }) {

@@ -74,6 +74,7 @@ export interface SearchIdParams<T> {
 export interface SearchAll<T> {
   Model: ReturnModelType<ClazzT<T>>;
   transform?: Record<string, number>;
+  condition?: Object //TODO: CAMBIAR
 }
 
 export interface SearchRelationsParams<T> {
@@ -176,7 +177,6 @@ export interface SpotifyData {
   REDIRECT_URI: string;
 }
 
-
 export interface SongType {
   id: string;
   artists: { id: string; name: string }[];
@@ -200,4 +200,19 @@ export interface MappedSongType {
   urlImage: string;
   urlSong: string;
   date: string;
+}
+
+export interface AddSongModelType {
+  name: string;
+  idArtist: string;
+  idAlbum: string;
+  duration: number;
+  urlSong: string;
+  urlImage: string;
+  date: Date;
+}
+
+export interface DeleteSongType {
+  idSong: string;
+  idUser: string;
 }

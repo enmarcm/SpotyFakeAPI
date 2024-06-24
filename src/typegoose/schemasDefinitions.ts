@@ -49,6 +49,9 @@ export class User {
 
   @prop({ required: false, type: Boolean, default: false })
   public active!: boolean;
+
+  @prop({ required: false, type: String })
+  public idArtist?: string;
 }
 
 export class ActivateCode {
@@ -88,8 +91,11 @@ export class Song {
   @prop({ required: true, type: String })
   public _id!: string;
 
-  @prop({ ref: () => Artist, required: false, type: [String] })
-  public idArtist!: Ref<Artist>[];
+  @prop({ ref: () => Artist, required: false, type: Array<String> })
+  public idArtist?: Ref<Artist>[];
+
+  @prop({required: false, type: Array<String>})
+  public artistNames?: string[];  
 
   @prop({ required: true, type: String })
   public name!: string;
@@ -105,6 +111,9 @@ export class Song {
 
   @prop({ required: true, type: String })
   public urlSong!: string;
+
+  @prop({required: false, type: Array<String>})
+  public genres?: Array<String>;
 }
 
 export class Like {

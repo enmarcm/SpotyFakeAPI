@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { RegisterUser, RegisteredUser, UserInterface } from "../types";
 import REGISTER_VALIDATORS from "../schemas/registerValidators";
 import { INodeMailer } from "../data/instances";
-import CryptManager from "../components/CryptManager";
+import CryptManager from "../utils/CryptManager";
 import { Constants, URLS } from "../enums";
 import UserModelClass from "../models/UserModelClass";
 import ActivateModelClass from "../models/ActivateModelClass";
