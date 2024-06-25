@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import SongsModel from "../models/SongsModel";
-import { UserModel } from "../typegoose/models";
 import UserModelClass from "../models/UserModelClass";
 
 class SongsController {

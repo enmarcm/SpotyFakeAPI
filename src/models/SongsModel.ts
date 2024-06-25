@@ -3,7 +3,6 @@ import {
   LikeModel,
   PlaylistModel,
   SongModel,
-  UserModel,
 } from "../typegoose/models";
 import { ISpotifyAPIManager } from "../data/instances";
 import {
