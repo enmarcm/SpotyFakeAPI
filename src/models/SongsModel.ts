@@ -1,5 +1,10 @@
 import { ITSGooseHandler } from "../data/instances";
-import { SongModel } from "../typegoose/models";
+import {
+  LikeModel,
+  PlaylistModel,
+  SongModel,
+  UserModel,
+} from "../typegoose/models";
 import { ISpotifyAPIManager } from "../data/instances";
 import {
   AddSongModelType,
@@ -8,6 +13,8 @@ import {
   SongType,
 } from "../types";
 import ArtistModelClass from "./ArtistsModelClass";
+import UserModelClass from "./UserModelClass";
+import PlaylistModelClass from "./PlaylistModelClass";
 
 class SongsModel {
   static async addSongsApiToDB({
@@ -322,7 +329,9 @@ class SongsModel {
       urlImage: song.album?.images[0]
         ? song?.album?.images[0].url
         : "defaultImageUrl",
-      urlSong: song?.external_urls?.spotify,
+      urlSong:
+        song?.preview_url ||
+        "https://p.scdn.co/mp3-preview/23de3926689af61772c7ccb7c7110b1f4643ddf4?cid=cfe923b2d660439caf2b557b21f31221",
       date: song?.album?.release_date,
       genres: genres,
     };
@@ -336,11 +345,14 @@ class SongsModel {
     idArtist,
     idAlbum,
     duration,
-    urlSong,
-    urlImage,
+    urlSong = "https://p.scdn.co/mp3-preview/23de3926689af61772c7ccb7c7110b1f4643ddf4?cid=cfe923b2d660439caf2b557b21f31221",
+    urlImage = "https://i.scdn.co/image/ab67616d0000b273e63232b00577a053120ca08f",
     date,
   }: AddSongModelType) {
     try {
+      const userArtist = await UserModelClass.getUserInfo({ idUser: idArtist });
+      if (!userArtist.idArtist) throw new Error("User is not an artist");
+
       const song = await ITSGooseHandler.addDocument({
         Model: SongModel,
         data: { idArtist, name, duration, urlSong, urlImage, date, idAlbum },
@@ -355,11 +367,8 @@ class SongsModel {
     }
   }
 
-  //TODO:
   static async deleteSong({ idSong, idUser }: DeleteSongType) {
     try {
-      console.log(idSong, idUser); //TODO: Quitar esto
-
       //Verificar que la cancion existe
       const song = await ITSGooseHandler.searchOne({
         Model: SongModel,
@@ -369,13 +378,37 @@ class SongsModel {
       if (!song || song.error) throw new Error("Song not found");
 
       //verificar que el usuario sea dueño de esa cancion
-      //Encontrar el artista a partir del idUser
+      const userArtist = await UserModelClass.getUserInfo({ idUser });
 
-      //Eliminar de los albunes que pertenezca
+      if (!userArtist.idArtist) throw new Error("User is not an artist");
+
+      if (song.idArtist !== userArtist.idArtist)
+        throw new Error("User is not the owner of the song");
 
       //Eliminar de las listas de reproduccion que pertenezca
+      const playlists = await ITSGooseHandler.searchAll({
+        Model: PlaylistModel,
+        condition: { idSongs: { $in: [idSong] } },
+      });
+
+      if (playlists && playlists.length > 0) {
+        playlists.forEach(async (playlist: any) => {
+          const updatedSongs = playlist.idSongs.filter(
+            (idSong: any) => idSong !== idSong
+          );
+
+          await PlaylistModelClass.editSongsPlaylist({
+            idPlaylist: playlist._id,
+            idSongs: updatedSongs,
+          });
+        });
+      }
 
       //Eliminar de los likes
+      await ITSGooseHandler.removeAllDocumentsByCondition({
+        Model: LikeModel,
+        condition: { idSong },
+      });
 
       //Eliminar la cancion
       const deletedSong = await ITSGooseHandler.removeDocument({
@@ -390,17 +423,6 @@ class SongsModel {
         error: `An error occurred while deleting the song. Error: ${error}`,
       };
     }
-  }
-
-  //TODO
-  static async editSong({
-    idSong,
-    newData,
-  }: {
-    idSong: string;
-    newData: AddSongModelType;
-  }) {
-    console.log(idSong, newData);
   }
 }
 

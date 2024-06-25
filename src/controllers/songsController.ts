@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import SongsModel from "../models/SongsModel";
+import { UserModel } from "../typegoose/models";
+import UserModelClass from "../models/UserModelClass";
 
 class SongsController {
   static async getSongByName(req: Request, res: Response) {
@@ -28,18 +30,29 @@ class SongsController {
 
   static async addSong(req: Request, res: Response) {
     try {
-      const { name, idArtist, idAlbum, duration, urlImage, urlSong, date } =
+      const { name, idAlbum, duration, urlImage, urlSong, date } =
         req.body as any;
 
-      const { role } = req as any;
+      const { role, idUser } = req as any;
 
       if (role === "user")
         return res
           .status(401)
           .json({ error: "You don't have permission to add a song" });
 
+      //Obtener id de artista del user
+      const userInfo = await UserModelClass.getUserInfo({ idUser });
+
+      const { idArtist } = userInfo;
+
       //TODO AQUI HAY QUE CAMBIAR LA DURACION
-      if (!name || !idArtist || !idAlbum || !duration)
+      if (
+        !name ||
+        !idArtist ||
+        !idAlbum ||
+        !duration ||
+        !urlSong 
+      )
         return res.status(400).json({ error: "All fields are required" });
 
       const song = await SongsModel.addSong({
@@ -69,7 +82,7 @@ class SongsController {
 
       if (!genre) return res.status(400).json({ error: "Genre is required" });
 
-      const newGenre = [genre]
+      const newGenre = [genre];
 
       const songs = await SongsModel.getSongByGenre({
         genres: newGenre,
