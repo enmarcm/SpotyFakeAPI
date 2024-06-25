@@ -7,6 +7,7 @@ import {
   MappedSongType,
   SongType,
 } from "../types";
+import ArtistModelClass from "./ArtistsModelClass";
 
 class SongsModel {
   static async addSongsApiToDB({
@@ -42,9 +43,7 @@ class SongsModel {
 
         if (name) {
           spotifySongs = await this.fetchSpotifySongs({ name, limit });
-
         } else if (genres && genres.length > 0) {
-
           for (const genre of genres) {
             const genreSongs = await this.fetchSpotifySongs({
               genre: genre,
@@ -53,7 +52,6 @@ class SongsModel {
 
             spotifySongs.push(...genreSongs);
           }
-
         }
         const newSongs = this.filterNewSongs(spotifySongs, mappedSongs);
 
@@ -223,8 +221,6 @@ class SongsModel {
     genre?: string;
     limit: number;
   }): Promise<SongType[]> {
-    console.log(options);
-
     let response;
     if (options.name) {
       response = await ISpotifyAPIManager.getSongByName({
@@ -245,24 +241,44 @@ class SongsModel {
   }
 
   private static filterNewSongs(
-    spotifySongs: SongType[],
+    spotifySongs: any,
     mappedSongs: SongType[]
   ): SongType[] {
-    return spotifySongs.filter(
-      (song) => !mappedSongs.some((mappedSong) => mappedSong.id === song.id)
+    const newData = spotifySongs.items;
+
+    return newData?.filter(
+      (song: any) =>
+        !mappedSongs.some((mappedSong) => mappedSong.id === song.id)
     );
   }
 
   //TODO: Cambiar esto ya que gasta mucho ancho de banda
   private static async addNewSongsToDB(newSongs: SongType[]): Promise<void> {
     await Promise.all(
-      newSongs.map(async (song) => {
+      newSongs.map(async (song: any) => {
         const existingSong = await ITSGooseHandler.searchOne({
           Model: SongModel,
           condition: { _id: song.id },
         });
 
         if (!existingSong) {
+          // Iterar sobre el array de artistas de la canción
+          await Promise.all(
+            song.artists.map(async (artist: any) => {
+              const existingArtist = await ArtistModelClass.getArtistById({
+                id: artist.id,
+              });
+
+              if (!existingArtist) {
+                await ArtistModelClass.addArtist({
+                  id: artist.id,
+                  name: artist.name,
+                  dateOfJoin: new Date(),
+                }).catch((error) => console.error(error)); // Manejo de errores en caso de que la promesa sea rechazada
+              }
+            })
+          );
+
           const dataMapped = await this.mapSongData(song);
 
           await ITSGooseHandler.addDocument({

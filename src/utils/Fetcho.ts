@@ -11,8 +11,6 @@ const fetcho = ({
 }: FetchoParams): Promise<Record<string, any> | false> => {
   const urlObj = new URL(url);
 
-  console.log(url)
-
   const defaultHeaders = {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),

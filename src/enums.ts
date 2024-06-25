@@ -4,6 +4,8 @@ export enum Routes {
   MAIN = "/",
   AUTH = "/auth",
   SONGS = "/songs",
+  PROFILE = "/profile",
+  PLAYLIST = "/playlist",
 }
 
 export const URLS = {

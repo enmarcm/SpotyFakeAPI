@@ -139,7 +139,7 @@ export class Album {
 }
 
 export class Playlist {
-  @prop({ ref: () => Song, required: true, type: [String] })
+  @prop({ ref: () => Song, required: true, type: Array<String> })
   public idSongs!: Ref<Song>[];
 
   @prop({ ref: () => User, required: true, type: String })
@@ -151,9 +151,7 @@ export class Playlist {
   @prop({ required: false, type: String })
   public description!: string;
 
-  @prop({ required: true, type: String })
+  @prop({ required: false, type: String })
   public urlQr!: string;
 
-  @prop({ required: true, type: String })
-  public type!: string;
 }
