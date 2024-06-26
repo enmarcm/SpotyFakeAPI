@@ -206,7 +206,7 @@ export interface MappedSongType {
 export interface AddSongModelType {
   name: string;
   idArtist: string;
-  idAlbum: string;
+  albumName: string;
   duration: number;
   urlSong: string;
   urlImage: string;

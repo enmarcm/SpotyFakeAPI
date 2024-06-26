@@ -27,6 +27,7 @@ app.use(midConnectDB);
 app.use(Routes.AUTH, R.authRouter);
 app.use(Routes.SONGS, midToken, R.songRouter);
 app.use(Routes.PLAYLIST, midToken, R.playlistRouter);
+app.use(Routes.PROFILE, midToken, R.profileRouter);
 
 app.use(midErrorHandler);
 app.use(midNotFound);

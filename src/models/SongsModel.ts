@@ -1,9 +1,5 @@
 import { ITSGooseHandler } from "../data/instances";
-import {
-  LikeModel,
-  PlaylistModel,
-  SongModel,
-} from "../typegoose/models";
+import { LikeModel, PlaylistModel, SongModel } from "../typegoose/models";
 import { ISpotifyAPIManager } from "../data/instances";
 import {
   AddSongModelType,
@@ -99,10 +95,12 @@ class SongsModel {
     name,
     page = 1,
     limit = 5,
+    retry = false,
   }: {
     name: string;
     page?: number;
     limit?: number;
+    retry?: boolean;
   }) {
     try {
       const mapPage = Math.max(page, 1);
@@ -147,6 +145,10 @@ class SongsModel {
             effectiveOffset + mapLimit
           );
         }
+      }
+
+      if (mappedSongs.length === 0 && !retry) {
+        this.getSongByName({ name, page: mapPage, limit, retry: true });
       }
 
       return mappedSongs;
@@ -333,16 +335,16 @@ class SongsModel {
         "https://p.scdn.co/mp3-preview/23de3926689af61772c7ccb7c7110b1f4643ddf4?cid=cfe923b2d660439caf2b557b21f31221",
       date: song?.album?.release_date,
       genres: genres,
+      albumName: song?.album?.name,
     };
 
     return newSong;
   }
 
-  //TODO:
   static async addSong({
     name,
     idArtist,
-    idAlbum,
+    albumName,
     duration,
     urlSong = "https://p.scdn.co/mp3-preview/23de3926689af61772c7ccb7c7110b1f4643ddf4?cid=cfe923b2d660439caf2b557b21f31221",
     urlImage = "https://i.scdn.co/image/ab67616d0000b273e63232b00577a053120ca08f",
@@ -354,7 +356,7 @@ class SongsModel {
 
       const song = await ITSGooseHandler.addDocument({
         Model: SongModel,
-        data: { idArtist, name, duration, urlSong, urlImage, date, idAlbum },
+        data: { idArtist, name, duration, urlSong, urlImage, date, albumName },
       });
 
       return song;

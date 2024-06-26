@@ -114,6 +114,9 @@ export class Song {
 
   @prop({required: false, type: Array<String>})
   public genres?: Array<String>;
+
+  @prop({ required: false, type: String })
+  public albumName?: string;
 }
 
 export class Like {

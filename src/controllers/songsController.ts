@@ -29,7 +29,7 @@ class SongsController {
 
   static async addSong(req: Request, res: Response) {
     try {
-      const { name, idAlbum, duration, urlImage, urlSong, date } =
+      const { name, albumName, duration, urlImage, urlSong, date } =
         req.body as any;
 
       const { role, idUser } = req as any;
@@ -45,19 +45,13 @@ class SongsController {
       const { idArtist } = userInfo;
 
       //TODO AQUI HAY QUE CAMBIAR LA DURACION
-      if (
-        !name ||
-        !idArtist ||
-        !idAlbum ||
-        !duration ||
-        !urlSong 
-      )
+      if (!name || !idArtist || !albumName || !duration || !urlSong)
         return res.status(400).json({ error: "All fields are required" });
 
       const song = await SongsModel.addSong({
         name,
         idArtist,
-        idAlbum,
+        albumName,
         duration,
         urlSong,
         urlImage,
@@ -95,6 +89,22 @@ class SongsController {
       return res.status(500).json({
         error: `An error occurred while searching for the songs. Error: ${error}`,
       });
+    }
+  }
+
+  static async deleteSong(req: Request, res: Response) {
+    try {
+      const { idSong } = req.params;
+      const { idUser } = req as any;
+
+      const result = await SongsModel.deleteSong({ idSong, idUser });
+
+      return res.json(result);
+    } catch (error) {
+      console.error(error);
+      throw new Error(
+        `An error occurred while deleting the song. Error: ${error}`
+      );
     }
   }
 }
