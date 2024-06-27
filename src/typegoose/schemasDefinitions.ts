@@ -77,6 +77,9 @@ export class Artist {
 
   @prop({ required: true, type: Date })
   public dateOfJoin!: Date;
+
+  @prop({ required: false, type: String })
+  public urlImage?: string;
 }
 
 export class Subscription {
@@ -94,8 +97,8 @@ export class Song {
   @prop({ ref: () => Artist, required: false, type: Array<String> })
   public idArtist?: Ref<Artist>[];
 
-  @prop({required: false, type: Array<String>})
-  public artistNames?: string[];  
+  @prop({ required: false, type: Array<String> })
+  public artistNames?: string[];
 
   @prop({ required: true, type: String })
   public name!: string;
@@ -112,7 +115,7 @@ export class Song {
   @prop({ required: true, type: String })
   public urlSong!: string;
 
-  @prop({required: false, type: Array<String>})
+  @prop({ required: false, type: Array<String> })
   public genres?: Array<String>;
 
   @prop({ required: false, type: String })
@@ -156,5 +159,4 @@ export class Playlist {
 
   @prop({ required: false, type: String })
   public urlQr!: string;
-
 }

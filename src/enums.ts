@@ -6,6 +6,7 @@ export enum Routes {
   SONGS = "/songs",
   PROFILE = "/profile",
   PLAYLIST = "/playlist",
+  ARTIST = "/artist",
 }
 
 export const URLS = {
@@ -16,6 +17,7 @@ export const URLS = {
   SPOTIFY_SEARCH: "https://api.spotify.com/v1/search",
   SPOTIFY_ARTISTS: "https://api.spotify.com/v1/artists",
   SPOTIFY_TRACKS: "https://api.spotify.com/v1/tracks",
+  SPOTIFY_BROWSE: "https://api.spotify.com/v1/browse",
 };
 
 export enum Constants {
@@ -29,4 +31,3 @@ export enum HttpMethod {
   PATCH = "PATCH",
   DELETE = "DELETE",
 }
-

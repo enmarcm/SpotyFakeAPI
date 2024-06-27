@@ -291,9 +291,61 @@ class SpotifyAPIManager {
         throw new Error("No genre information found for artist");
       }
   
-      return artistDetailsResponse.genres; // Devolver los géneros del artista
+      return artistDetailsResponse.genres; 
     } catch (error) {
       console.error("Error fetching genre for song:", error);
+      throw error;
+    }
+  }
+
+  async getArtistInfoById(id: string) {
+    await this.verifyTokenValid();
+
+    try {
+      const response = (await fetcho({
+        url: `${URLS.SPOTIFY_ARTISTS}/${id}`,
+        method: "GET",
+        headers: this.headers,
+      })) as any;
+
+      if (response?.error) throw new Error(response?.error);
+
+      if (!response || !response.genres)
+        throw new Error("Error fetching artist info by ID");
+
+      return response;
+    } catch (error) {
+      console.error("Error fetching artist info by ID:", error);
+      throw error;
+    }
+  }
+
+  public async getTopAlbums({
+    country = 'US',
+    limit = 10,
+  }: {
+    country?: string;
+    limit?: number;
+  }) {
+    await this.verifyTokenValid();
+  
+    try {
+      const url = `${URLS.SPOTIFY_BROWSE}/new-releases?country=${country}&limit=${limit}`;
+  
+      const response = (await fetcho({
+        url: url,
+        method: "GET",
+        headers: this.headers,
+      })) as any;
+  
+      if (response?.error) throw new Error(response?.error);
+  
+      if (!response || !response.albums)
+        throw new Error("Error fetching top albums");
+  
+      return response.albums;
+    } catch (error) {
+      console.error("Error fetching top albums:", error);
       throw error;
     }
   }

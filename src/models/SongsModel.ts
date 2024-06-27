@@ -278,10 +278,19 @@ class SongsModel {
               });
 
               if (!existingArtist) {
+
+                const artistData = await ISpotifyAPIManager.getArtistInfoById(artist.id);
+
+                if (!artistData) {
+                  console.log("No se encontró información del artista.");
+                  return;
+                }
+
                 await ArtistModelClass.addArtist({
                   id: artist.id,
                   name: artist.name,
                   dateOfJoin: new Date(),
+                  urlImage: artistData.images[0]?.url || "https://lastfm.freetls.fastly.net/i/u/770x0/dd90f6548472acf19dd781ef269b9d62.jpg#dd90f6548472acf19dd781ef269b9d62"
                 }).catch((error) => console.error(error)); // Manejo de errores en caso de que la promesa sea rechazada
               }
             })

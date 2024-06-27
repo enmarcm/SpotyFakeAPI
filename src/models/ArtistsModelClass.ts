@@ -16,15 +16,17 @@ class ArtistModelClass {
     id,
     name,
     dateOfJoin,
+    urlImage
   }: {
     id: string;
     name: string;
     dateOfJoin: Date;
+    urlImage: string;
   }) {
     try {
       const result = ITSGooseHandler.addDocument({
         Model: ArtistModel,
-        data: { _id: id, name, dateOfJoin },
+        data: { _id: id, name, dateOfJoin, urlImage },
       });
       return result;
     } catch (error) {
