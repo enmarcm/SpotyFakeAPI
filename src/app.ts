@@ -25,7 +25,7 @@ app.use(midConnectDB);
 
 //{ Routes
 app.use(Routes.AUTH, R.authRouter);
-app.use(Routes.SONGS, midToken, R.songRouter);
+app.use(Routes.SONGS, R.songRouter);
 app.use(Routes.PLAYLIST, midToken, R.playlistRouter);
 app.use(Routes.PROFILE, midToken, R.profileRouter);
 app.use(Routes.ARTIST, midToken, R.artistRouter);

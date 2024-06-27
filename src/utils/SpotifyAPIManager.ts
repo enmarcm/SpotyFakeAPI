@@ -204,17 +204,17 @@ class SpotifyAPIManager {
 
     try {
       const response = (await fetcho({
-        url: `${URLS.SPOTIFY_SEARCH}?q=id:${id}&type=artist`,
+        url: `${URLS.SPOTIFY_BASE_URL}/artists/${id}`,
         method: "GET",
         headers: this.headers,
       })) as any;
 
       if (response?.error) throw new Error(response?.error);
 
-      if (!response || !response.artists)
+      if (!response)
         throw new Error("Error fetching artist by ID");
 
-      return response.artists.items;
+      return response;
     } catch (error) {
       console.error("Error fetching artist by ID:", error);
       throw error;

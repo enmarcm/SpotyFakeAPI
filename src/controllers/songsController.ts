@@ -121,14 +121,30 @@ class SongsController {
       console.log(song);
 
       const mappedSong = {
-        name: song.name,
-        id: song.id,
-        duration_ms: song.duration_ms,
-        urlImage: song.album.images[0].url,
-        url_song:
-          song.preview_url ||
-          "https://p.scdn.co/mp3-preview/23de3926689af61772c7ccb7c7110b1f4643ddf4?cid=cfe923b2d660439caf2b557b21f31221",
-      };
+  name: song.name,
+  id: song.id,
+  duration_ms: song.duration_ms,
+  urlImage: song.album.images[0].url,
+  url_song:
+    song.preview_url ||
+    "https://p.scdn.co/mp3-preview/23de3926689af61772c7ccb7c7110b1f4643ddf4?cid=cfe923b2d660439caf2b557b21f31221",
+  artists: await Promise.all(
+    song.artists.map((artist: any) =>
+      ISpotifyAPIManager.getArtistById({ id: artist.id })
+    )
+  ).then(artistsInfo => artistsInfo.map((artistInfo: any) => ({
+    id: artistInfo.id,
+    name: artistInfo.name,
+    followers: artistInfo.followers.total,
+    genres: artistInfo.genres,
+  }))),
+  album: {
+    name: song.album.name,
+    urlImage: song.album.images[0].url,
+    id: song.album.id,
+  },
+  date: song.album.release_date,
+};
 
       return res.json(mappedSong);
     } catch (error) {
