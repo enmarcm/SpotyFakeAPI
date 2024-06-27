@@ -161,9 +161,25 @@ class SongsController {
   static async getTopSongs(_req: Request, res: Response) {
     try {
       const response = await ISpotifyAPIManager.getTopTracks({});
-      
+
       return res.json(response);
     } catch (error) {
+      throw new Error(
+        `An error occurred while fetching the top songs. Error: ${error}`
+      );
+    }
+  }
+
+  static async getTopArtistSongs(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const result = await ISpotifyAPIManager.getFamousSongByArtistId({ id });
+
+      return res.json(result);
+    } catch (error) {
+      console.error(
+        `An error occurred while fetching the top songs. Error: ${error}`
+      );
       throw new Error(
         `An error occurred while fetching the top songs. Error: ${error}`
       );

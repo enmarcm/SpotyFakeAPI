@@ -424,5 +424,47 @@ class SpotifyAPIManager {
             }
         });
     }
+    getFamousSongByArtistId(_a) {
+        return __awaiter(this, arguments, void 0, function* ({ id }) {
+            yield this.verifyTokenValid(); // Verificar el token de acceso
+            try {
+                const limit = 8; // Número de canciones más populares que queremos obtener
+                const country = 'US'; // Especificar el país puede ser necesario para algunas APIs
+                // Construir la URL para obtener las top tracks del artista
+                const url = `${enums_1.URLS.SPOTIFY_ARTISTS}/${id}/top-tracks?country=${country}`;
+                // Hacer la solicitud a la API de Spotify
+                const response = (yield (0, Fetcho_1.default)({
+                    url: url,
+                    method: "GET",
+                    headers: this.headers,
+                }));
+                if (response === null || response === void 0 ? void 0 : response.error)
+                    throw new Error(response === null || response === void 0 ? void 0 : response.error);
+                // Verificar que la respuesta contenga tracks
+                if (!response || !response.tracks)
+                    throw new Error("Error fetching top tracks for artist ID");
+                // Formatear las tracks para devolver solo la información relevante
+                const formattedTracks = response.tracks.slice(0, limit).map((track) => {
+                    var _a;
+                    return ({
+                        _id: track.id,
+                        idArtist: track.artists.map((artist) => artist.id),
+                        artistNames: track.artists.map((artist) => artist.name),
+                        name: track.name,
+                        duration: track.duration_ms,
+                        urlImage: (_a = track.album.images[0]) === null || _a === void 0 ? void 0 : _a.url,
+                        urlSong: track.preview_url,
+                        date: track.album.release_date,
+                        albumName: track.album.name,
+                    });
+                });
+                return formattedTracks;
+            }
+            catch (error) {
+                console.error("Error fetching famous songs by artist ID:", error);
+                throw error;
+            }
+        });
+    }
 }
 exports.default = SpotifyAPIManager;

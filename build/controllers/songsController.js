@@ -161,5 +161,18 @@ class SongsController {
             }
         });
     }
+    static getTopArtistSongs(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { id } = req.params;
+                const result = yield instances_1.ISpotifyAPIManager.getFamousSongByArtistId({ id });
+                return res.json(result);
+            }
+            catch (error) {
+                console.error(`An error occurred while fetching the top songs. Error: ${error}`);
+                throw new Error(`An error occurred while fetching the top songs. Error: ${error}`);
+            }
+        });
+    }
 }
 exports.default = SongsController;
