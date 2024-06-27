@@ -241,21 +241,23 @@ class SpotifyAPIManager {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.verifyTokenValid(); // Asegurar que el token es válido
             try {
-                const songDetailsResponse = yield (0, Fetcho_1.default)({
+                const songDetailsResponse = (yield (0, Fetcho_1.default)({
                     url: `${enums_1.URLS.SPOTIFY_TRACKS}/${songId}`,
                     method: "GET",
                     headers: this.headers,
-                });
-                if (!songDetailsResponse || !songDetailsResponse.artists || songDetailsResponse.artists.length === 0) {
+                }));
+                if (!songDetailsResponse ||
+                    !songDetailsResponse.artists ||
+                    songDetailsResponse.artists.length === 0) {
                     throw new Error("No artist information found for song");
                 }
                 const artistId = songDetailsResponse.artists[0].id; // Asumiendo el primer artista
                 // Paso 2: Obtener detalles del artista para extraer los géneros
-                const artistDetailsResponse = yield (0, Fetcho_1.default)({
+                const artistDetailsResponse = (yield (0, Fetcho_1.default)({
                     url: `${enums_1.URLS.SPOTIFY_ARTISTS}/${artistId}`,
                     method: "GET",
                     headers: this.headers,
-                });
+                }));
                 if (!artistDetailsResponse || !artistDetailsResponse.genres) {
                     throw new Error("No genre information found for artist");
                 }
@@ -289,7 +291,7 @@ class SpotifyAPIManager {
         });
     }
     getTopAlbums(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ country = 'US', limit = 10, }) {
+        return __awaiter(this, arguments, void 0, function* ({ country = "US", limit = 10, }) {
             yield this.verifyTokenValid();
             try {
                 const url = `${enums_1.URLS.SPOTIFY_BROWSE}/new-releases?country=${country}&limit=${limit}`;
@@ -332,7 +334,7 @@ class SpotifyAPIManager {
         });
     }
     getTopTracks(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ country = 'US', limit = 10, }) {
+        return __awaiter(this, arguments, void 0, function* ({ country = "US", limit = 10, }) {
             yield this.verifyTokenValid();
             try {
                 const url = `${enums_1.URLS.SPOTIFY_BROWSE}/featured-playlists?country=${country}&limit=${limit}`;
@@ -346,11 +348,11 @@ class SpotifyAPIManager {
                 if (!response || !response.playlists || !response.playlists.items)
                     throw new Error("Error fetching top tracks");
                 const playlistId = response.playlists.items[0].id;
-                const tracksResponse = yield (0, Fetcho_1.default)({
+                const tracksResponse = (yield (0, Fetcho_1.default)({
                     url: `${enums_1.URLS.SPOTIFY_PLAYLISTS}/${playlistId}/tracks`,
                     method: "GET",
                     headers: this.headers,
-                });
+                }));
                 if (tracksResponse === null || tracksResponse === void 0 ? void 0 : tracksResponse.error)
                     throw new Error(tracksResponse === null || tracksResponse === void 0 ? void 0 : tracksResponse.error);
                 if (!tracksResponse || !tracksResponse.items)
@@ -373,6 +375,51 @@ class SpotifyAPIManager {
             }
             catch (error) {
                 console.error("Error fetching top tracks:", error);
+                throw error;
+            }
+        });
+    }
+    getAlbumsByArtistId(_a) {
+        return __awaiter(this, arguments, void 0, function* ({ id }) {
+            yield this.verifyTokenValid();
+            try {
+                const response = (yield (0, Fetcho_1.default)({
+                    url: `${enums_1.URLS.SPOTIFY_ARTISTS}/${id}/albums`,
+                    method: "GET",
+                    headers: this.headers,
+                }));
+                if (response === null || response === void 0 ? void 0 : response.error)
+                    throw new Error(response === null || response === void 0 ? void 0 : response.error);
+                if (!response || !response.items)
+                    throw new Error("Error fetching albums by artist ID");
+                // Mapear cada álbum para obtener detalles adicionales
+                const albumsDetails = yield Promise.all(response.items.map((album) => __awaiter(this, void 0, void 0, function* () {
+                    // Obtener las canciones (tracks) del álbum
+                    const tracksResponse = (yield (0, Fetcho_1.default)({
+                        url: `${album.href}/tracks`,
+                        method: "GET",
+                        headers: this.headers,
+                    }));
+                    if (tracksResponse === null || tracksResponse === void 0 ? void 0 : tracksResponse.error)
+                        throw new Error(tracksResponse === null || tracksResponse === void 0 ? void 0 : tracksResponse.error);
+                    // Construir un objeto con la información del álbum y sus tracks
+                    return {
+                        name: album.name,
+                        releaseDate: album.release_date,
+                        tracks: tracksResponse.items.map((track) => {
+                            var _a;
+                            return ({
+                                name: track.name,
+                                id: track.id,
+                                urlImage: (_a = track.album.images[0]) === null || _a === void 0 ? void 0 : _a.url,
+                            });
+                        }),
+                    };
+                })));
+                return albumsDetails;
+            }
+            catch (error) {
+                console.error("Error fetching albums by artist ID:", error);
                 throw error;
             }
         });

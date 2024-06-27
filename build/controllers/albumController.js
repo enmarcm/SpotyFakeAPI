@@ -48,5 +48,43 @@ class AlbumController {
             }
         });
     }
+    static getAlbumByIdArtist(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { id } = req.params;
+                const result = yield instances_1.ISpotifyAPIManager.getAlbumsByArtistId({ id });
+                const mappedResult = Promise.all(result.map((item) => __awaiter(this, void 0, void 0, function* () {
+                    const albumSongs = yield instances_1.ISpotifyAPIManager.getAlbumTracks({
+                        id: item.id,
+                    });
+                    const mappedAlbumSongs = albumSongs.map((song) => {
+                        return {
+                            name: song.name,
+                            id: song.id,
+                            duration_ms: song.duration_ms,
+                            url_song: song.preview_url,
+                        };
+                    });
+                    const objectResult = {
+                        name: item.name,
+                        id: item.id,
+                        urlImage: item.images[0].url,
+                        release_date: item.release_date,
+                        total_tracks: item.total_tracks,
+                        artists: item.artists,
+                        songs: mappedAlbumSongs,
+                    };
+                    console.log(objectResult);
+                    return objectResult;
+                })));
+                const newMappedResult = yield mappedResult;
+                return res.json(newMappedResult);
+            }
+            catch (error) {
+                console.error(`An error occurred while fetching the albums by artist id. Error: ${error}`);
+                throw new Error(`An error occurred while fetching the albums by artist id. Error: ${error}`);
+            }
+        });
+    }
 }
 exports.default = AlbumController;

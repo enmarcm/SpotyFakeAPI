@@ -158,15 +158,14 @@ class SpotifyAPIManager {
 
     try {
       const response = (await fetcho({
-        url: `${URLS.SPOTIFY_BASE_URL}/tracks/${id}`, 
+        url: `${URLS.SPOTIFY_BASE_URL}/tracks/${id}`,
         method: "GET",
         headers: this.headers,
       })) as any;
 
       if (response?.error) throw new Error(response?.error);
 
-      if (!response )
-        throw new Error("Error fetching song by ID");
+      if (!response) throw new Error("Error fetching song by ID");
 
       return response;
     } catch (error) {
@@ -209,8 +208,7 @@ class SpotifyAPIManager {
 
       if (response?.error) throw new Error(response?.error);
 
-      if (!response)
-        throw new Error("Error fetching artist by ID");
+      if (!response) throw new Error("Error fetching artist by ID");
 
       return response;
     } catch (error) {
@@ -265,33 +263,36 @@ class SpotifyAPIManager {
 
   public async fetchGenreForSong(songId: string): Promise<string[]> {
     await this.verifyTokenValid(); // Asegurar que el token es válido
-  
-    try {
 
-      const songDetailsResponse = await fetcho({
+    try {
+      const songDetailsResponse = (await fetcho({
         url: `${URLS.SPOTIFY_TRACKS}/${songId}`,
         method: "GET",
         headers: this.headers,
-      }) as any;
-  
-      if (!songDetailsResponse || !songDetailsResponse.artists || songDetailsResponse.artists.length === 0) {
+      })) as any;
+
+      if (
+        !songDetailsResponse ||
+        !songDetailsResponse.artists ||
+        songDetailsResponse.artists.length === 0
+      ) {
         throw new Error("No artist information found for song");
       }
-  
+
       const artistId = songDetailsResponse.artists[0].id; // Asumiendo el primer artista
-  
+
       // Paso 2: Obtener detalles del artista para extraer los géneros
-      const artistDetailsResponse = await fetcho({
+      const artistDetailsResponse = (await fetcho({
         url: `${URLS.SPOTIFY_ARTISTS}/${artistId}`,
         method: "GET",
         headers: this.headers,
-      }) as any;
-  
+      })) as any;
+
       if (!artistDetailsResponse || !artistDetailsResponse.genres) {
         throw new Error("No genre information found for artist");
       }
-  
-      return artistDetailsResponse.genres; 
+
+      return artistDetailsResponse.genres;
     } catch (error) {
       console.error("Error fetching genre for song:", error);
       throw error;
@@ -321,28 +322,28 @@ class SpotifyAPIManager {
   }
 
   public async getTopAlbums({
-    country = 'US',
+    country = "US",
     limit = 10,
   }: {
     country?: string;
     limit?: number;
   }) {
     await this.verifyTokenValid();
-  
+
     try {
       const url = `${URLS.SPOTIFY_BROWSE}/new-releases?country=${country}&limit=${limit}`;
-  
+
       const response = (await fetcho({
         url: url,
         method: "GET",
         headers: this.headers,
       })) as any;
-  
+
       if (response?.error) throw new Error(response?.error);
-  
+
       if (!response || !response.albums)
         throw new Error("Error fetching top albums");
-  
+
       return response.albums;
     } catch (error) {
       console.error("Error fetching top albums:", error);
@@ -350,7 +351,7 @@ class SpotifyAPIManager {
     }
   }
 
-  public async getAlbumTracks({id}: {id: string}) {
+  public async getAlbumTracks({ id }: { id: string }) {
     await this.verifyTokenValid();
 
     try {
@@ -373,42 +374,41 @@ class SpotifyAPIManager {
   }
 
   public async getTopTracks({
-    country = 'US',
+    country = "US",
     limit = 10,
   }: {
     country?: string;
     limit?: number;
   }) {
     await this.verifyTokenValid();
-  
+
     try {
       const url = `${URLS.SPOTIFY_BROWSE}/featured-playlists?country=${country}&limit=${limit}`;
-  
+
       const response = (await fetcho({
         url: url,
         method: "GET",
         headers: this.headers,
       })) as any;
-  
+
       if (response?.error) throw new Error(response?.error);
-  
+
       if (!response || !response.playlists || !response.playlists.items)
         throw new Error("Error fetching top tracks");
-  
+
       const playlistId = response.playlists.items[0].id;
-      const tracksResponse = await fetcho({
+      const tracksResponse = (await fetcho({
         url: `${URLS.SPOTIFY_PLAYLISTS}/${playlistId}/tracks`,
         method: "GET",
         headers: this.headers,
-      }) as any;
-  
+      })) as any;
 
       if (tracksResponse?.error) throw new Error(tracksResponse?.error);
-  
+
       if (!tracksResponse || !tracksResponse.items)
         throw new Error("Error fetching tracks from playlist");
-  
-      const formattedTracks = tracksResponse.items.map((item : any) => ({
+
+      const formattedTracks = tracksResponse.items.map((item: any) => ({
         _id: item.track.id,
         idArtist: item.track.artists.map((artist: any) => artist.id),
         artistNames: item.track.artists.map((artist: any) => artist.name),
@@ -419,14 +419,59 @@ class SpotifyAPIManager {
         date: item.track.album.release_date,
         albumName: item.track.album.name,
       }));
-  
+
       return formattedTracks;
     } catch (error) {
       console.error("Error fetching top tracks:", error);
       throw error;
     }
   }
-  
+
+  public async getAlbumsByArtistId({ id }: { id: string }) {
+    await this.verifyTokenValid();
+
+    try {
+      const response = (await fetcho({
+        url: `${URLS.SPOTIFY_ARTISTS}/${id}/albums`,
+        method: "GET",
+        headers: this.headers,
+      })) as any;
+
+      if (response?.error) throw new Error(response?.error);
+      if (!response || !response.items)
+        throw new Error("Error fetching albums by artist ID");
+
+      // Mapear cada álbum para obtener detalles adicionales
+      const albumsDetails = await Promise.all(
+        response.items.map(async (album: any) => {
+          // Obtener las canciones (tracks) del álbum
+          const tracksResponse = (await fetcho({
+            url: `${album.href}/tracks`,
+            method: "GET",
+            headers: this.headers,
+          })) as any;
+
+          if (tracksResponse?.error) throw new Error(tracksResponse?.error);
+
+          // Construir un objeto con la información del álbum y sus tracks
+          return {
+            name: album.name,
+            releaseDate: album.release_date,
+            tracks: tracksResponse.items.map((track: any) => ({
+              name: track.name,
+              id: track.id,
+              urlImage: track.album.images[0]?.url,
+            })),
+          };
+        })
+      );
+
+      return albumsDetails;
+    } catch (error) {
+      console.error("Error fetching albums by artist ID:", error);
+      throw error;
+    }
+  }
 }
 
 export default SpotifyAPIManager;
