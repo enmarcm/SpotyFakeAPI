@@ -29,6 +29,7 @@ app.use(Routes.SONGS, midToken, R.songRouter);
 app.use(Routes.PLAYLIST, midToken, R.playlistRouter);
 app.use(Routes.PROFILE, midToken, R.profileRouter);
 app.use(Routes.ARTIST, midToken, R.artistRouter);
+app.use(Routes.ALBUM, midToken, R.albumRouter);
 
 app.use(midErrorHandler);
 app.use(midNotFound);

@@ -4,6 +4,7 @@ import profileRouter from "./profileRouter";
 import songRouter from "./songRouter";
 import artistRouter from "./artistRouter";
 import playlistRouter from "./playlistRouter";
+import albumRouter from "./albumRouter";
 
 export default {
   artistRouter,
@@ -12,4 +13,5 @@ export default {
   profileRouter,
   songRouter,
   playlistRouter,
+  albumRouter,
 };

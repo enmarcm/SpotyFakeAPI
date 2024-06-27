@@ -3,7 +3,10 @@ import SongsController from "../controllers/songsController";
 
 const songRouter = Router();
 
+songRouter.get("/getById/:idSong", SongsController.getSongById);
 songRouter.get("/:songName", SongsController.getSongByName);
+
+
 
 songRouter.post("/getByGenre", SongsController.getSongsByGenre);
 

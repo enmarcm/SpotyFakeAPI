@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import SongsModel from "../models/SongsModel";
 import UserModelClass from "../models/UserModelClass";
+import { ISpotifyAPIManager } from "../data/instances";
 
 class SongsController {
   static async getSongByName(req: Request, res: Response) {
@@ -105,6 +106,34 @@ class SongsController {
       throw new Error(
         `An error occurred while deleting the song. Error: ${error}`
       );
+    }
+  }
+
+  static async getSongById(req: Request, res: Response) {
+    try {
+      const { idSong } = req.params;
+
+      if (!idSong)
+        return res.status(400).json({ error: "Song id is required" });
+
+      const song = await ISpotifyAPIManager.getSongById({ id: idSong });
+
+      console.log(song)
+      
+      const mappedSong = {
+        name: song.name,
+        id: song.id,
+        duration_ms: song.duration_ms,
+        urlImage: song.album.images[0].url,
+        url_song: song.preview_url,
+      };
+
+      return res.json(mappedSong);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        error: `An error occurred while searching for the song. Error: ${error}`,
+      });
     }
   }
 }

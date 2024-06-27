@@ -156,19 +156,22 @@ class SpotifyAPIManager {
   public async getSongById({ id }: { id: string }) {
     await this.verifyTokenValid();
 
+
+    console.log(id)
     try {
       const response = (await fetcho({
-        url: `${URLS.SPOTIFY_SEARCH}?q=id:${id}&type=track`,
+        url: `${URLS.SPOTIFY_BASE_URL}/tracks/${id}`, 
         method: "GET",
         headers: this.headers,
       })) as any;
 
       if (response?.error) throw new Error(response?.error);
 
-      if (!response || !response.tracks)
+      if (!response )
         throw new Error("Error fetching song by ID");
 
-      return response.tracks;
+      console.log(response)
+      return response;
     } catch (error) {
       console.error("Error fetching song by ID:", error);
       throw error;
@@ -349,6 +352,30 @@ class SpotifyAPIManager {
       throw error;
     }
   }
+
+  public async getAlbumTracks({id}: {id: string}) {
+    await this.verifyTokenValid();
+
+    try {
+      const response = (await fetcho({
+        url: `${URLS.SPOTIFY_API}v1/albums/${id}/tracks`,
+        method: "GET",
+        headers: this.headers,
+      })) as any;
+
+      if (response?.error) throw new Error(response?.error);
+
+      if (!response || !response.items)
+        throw new Error("Error fetching album tracks");
+
+      return response.items;
+    } catch (error) {
+      console.error("Error fetching album tracks:", error);
+      throw error;
+    }
+  }
+
+  
 }
 
 export default SpotifyAPIManager;
