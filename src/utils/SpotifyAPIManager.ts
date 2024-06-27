@@ -156,8 +156,6 @@ class SpotifyAPIManager {
   public async getSongById({ id }: { id: string }) {
     await this.verifyTokenValid();
 
-
-    console.log(id)
     try {
       const response = (await fetcho({
         url: `${URLS.SPOTIFY_BASE_URL}/tracks/${id}`, 

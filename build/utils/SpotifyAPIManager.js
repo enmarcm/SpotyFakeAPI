@@ -1,0 +1,335 @@
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const Fetcho_1 = __importDefault(require("./Fetcho"));
+const constants_1 = require("../constants");
+const enums_1 = require("../enums");
+//TODO: MAPEAR TODA LA INFORMACION QUE SE OBTIENE DE SPOTIFY
+//TODO: GUARDAR TOKEN EN BD
+class SpotifyAPIManager {
+    constructor() {
+        this.accessToken = null;
+        this.tokenExpiration = null;
+        this.TOKEN_EXPIRATION_TIME = 3450;
+    }
+    initialize() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const token = yield this.obtainTokenSpotify();
+                const expirationDate = new Date(new Date().getTime() + this.TOKEN_EXPIRATION_TIME * 1000);
+                this.accessToken = token;
+                this.tokenExpiration = expirationDate;
+            }
+            catch (error) {
+                console.error("Failed to initialize SpotifyAPIManager:", error);
+            }
+        });
+    }
+    obtainTokenSpotify() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const response = yield (0, Fetcho_1.default)({
+                    url: enums_1.URLS.SPOTIFY_API_TOKEN,
+                    method: "POST",
+                    headers: constants_1.CONTENT_TYPE_SPOTIFY,
+                    body: constants_1.BODY_FETCH_SPOTIFY,
+                });
+                if (!response || !response.access_token) {
+                    throw new Error("Error fetching Spotify access token");
+                }
+                console.log("Spotify access token fetched successfully");
+                return response.access_token;
+            }
+            catch (error) {
+                throw new Error(`Error fetching Spotify access token. Error: ${error}`);
+            }
+        });
+    }
+    verifyTokenValid() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const now = new Date();
+            if (!this.accessToken ||
+                !this.tokenExpiration ||
+                now >= this.tokenExpiration)
+                yield this.initialize();
+        });
+    }
+    get headers() {
+        return {
+            Authorization: `Bearer ${this.accessToken}`,
+        };
+    }
+    getSongByName(_a) {
+        return __awaiter(this, arguments, void 0, function* ({ name, limit = 20, offset = 0, include_external = "audio", }) {
+            yield this.verifyTokenValid();
+            try {
+                const url = `${enums_1.URLS.SPOTIFY_SEARCH}?q=${encodeURIComponent(name)}&type=track&limit=${limit}&offset=${offset}&include_external=${include_external}`;
+                const response = (yield (0, Fetcho_1.default)({
+                    url: url,
+                    method: "GET",
+                    headers: this.headers,
+                }));
+                if (response === null || response === void 0 ? void 0 : response.error)
+                    throw new Error(response === null || response === void 0 ? void 0 : response.error);
+                if (!response || !response.tracks)
+                    throw new Error("Error fetching song by name");
+                return response.tracks;
+            }
+            catch (error) {
+                console.error("Error fetching song by name:", error);
+                throw error;
+            }
+        });
+    }
+    getSongByGenre(_a) {
+        return __awaiter(this, arguments, void 0, function* ({ genre, artistLimit = 5, trackLimit = 10, }) {
+            yield this.verifyTokenValid();
+            try {
+                // Paso 1: Buscar artistas por género
+                const artistSearchUrl = `${enums_1.URLS.SPOTIFY_SEARCH}?q=genre:${encodeURIComponent(genre)}&type=artist&limit=${artistLimit}`;
+                const artistResponse = (yield (0, Fetcho_1.default)({
+                    url: artistSearchUrl,
+                    method: "GET",
+                    headers: this.headers,
+                }));
+                if (artistResponse === null || artistResponse === void 0 ? void 0 : artistResponse.error)
+                    throw new Error(artistResponse === null || artistResponse === void 0 ? void 0 : artistResponse.error);
+                if (!artistResponse ||
+                    !artistResponse.artists ||
+                    !artistResponse.artists.items)
+                    throw new Error("Error fetching artists by genre");
+                // Paso 2: Obtener las canciones más populares de los artistas encontrados
+                const tracks = [];
+                for (const artist of artistResponse.artists.items) {
+                    const topTracksUrl = `${enums_1.URLS.SPOTIFY_ARTISTS}/${artist.id}/top-tracks?market=US`;
+                    const topTracksResponse = (yield (0, Fetcho_1.default)({
+                        url: topTracksUrl,
+                        method: "GET",
+                        headers: this.headers,
+                    }));
+                    if (topTracksResponse === null || topTracksResponse === void 0 ? void 0 : topTracksResponse.error)
+                        throw new Error(topTracksResponse === null || topTracksResponse === void 0 ? void 0 : topTracksResponse.error);
+                    if (!topTracksResponse || !topTracksResponse.tracks)
+                        throw new Error(`Error fetching top tracks for artist ${artist.name}`);
+                    tracks.push(...topTracksResponse.tracks.slice(0, trackLimit));
+                }
+                return tracks;
+            }
+            catch (error) {
+                console.error("Error fetching songs by genre:", error);
+                throw error;
+            }
+        });
+    }
+    getSongById(_a) {
+        return __awaiter(this, arguments, void 0, function* ({ id }) {
+            yield this.verifyTokenValid();
+            try {
+                const response = (yield (0, Fetcho_1.default)({
+                    url: `${enums_1.URLS.SPOTIFY_BASE_URL}/tracks/${id}`,
+                    method: "GET",
+                    headers: this.headers,
+                }));
+                if (response === null || response === void 0 ? void 0 : response.error)
+                    throw new Error(response === null || response === void 0 ? void 0 : response.error);
+                if (!response)
+                    throw new Error("Error fetching song by ID");
+                return response;
+            }
+            catch (error) {
+                console.error("Error fetching song by ID:", error);
+                throw error;
+            }
+        });
+    }
+    getArtistByName(_a) {
+        return __awaiter(this, arguments, void 0, function* ({ name }) {
+            yield this.verifyTokenValid();
+            try {
+                const response = (yield (0, Fetcho_1.default)({
+                    url: `${enums_1.URLS.SPOTIFY_SEARCH}?q=artist:${name}&type=artist`,
+                    method: "GET",
+                    headers: this.headers,
+                }));
+                if (response === null || response === void 0 ? void 0 : response.error)
+                    throw new Error(response === null || response === void 0 ? void 0 : response.error);
+                if (!response || !response.artists)
+                    throw new Error("Error fetching artist by name");
+                return response.artists;
+            }
+            catch (error) {
+                console.error("Error fetching artist by name:", error);
+                throw error;
+            }
+        });
+    }
+    getArtistById(_a) {
+        return __awaiter(this, arguments, void 0, function* ({ id }) {
+            yield this.verifyTokenValid();
+            try {
+                const response = (yield (0, Fetcho_1.default)({
+                    url: `${enums_1.URLS.SPOTIFY_BASE_URL}/artists/${id}`,
+                    method: "GET",
+                    headers: this.headers,
+                }));
+                if (response === null || response === void 0 ? void 0 : response.error)
+                    throw new Error(response === null || response === void 0 ? void 0 : response.error);
+                if (!response)
+                    throw new Error("Error fetching artist by ID");
+                return response;
+            }
+            catch (error) {
+                console.error("Error fetching artist by ID:", error);
+                throw error;
+            }
+        });
+    }
+    getAlbumByName(_a) {
+        return __awaiter(this, arguments, void 0, function* ({ name }) {
+            yield this.verifyTokenValid();
+            try {
+                const response = (yield (0, Fetcho_1.default)({
+                    url: `${enums_1.URLS.SPOTIFY_SEARCH}?q=album:${name}&type=album`,
+                    method: "GET",
+                    headers: this.headers,
+                }));
+                if (response === null || response === void 0 ? void 0 : response.error)
+                    throw new Error(response === null || response === void 0 ? void 0 : response.error);
+                if (!response || !response.albums)
+                    throw new Error("Error fetching album by name");
+                return response.albums;
+            }
+            catch (error) {
+                console.error("Error fetching album by name:", error);
+                throw error;
+            }
+        });
+    }
+    getAlbumById(_a) {
+        return __awaiter(this, arguments, void 0, function* ({ id }) {
+            yield this.verifyTokenValid();
+            try {
+                const response = (yield (0, Fetcho_1.default)({
+                    url: `${enums_1.URLS.SPOTIFY_SEARCH}?q=id:${id}&type=album`,
+                    method: "GET",
+                    headers: this.headers,
+                }));
+                if (response === null || response === void 0 ? void 0 : response.error)
+                    throw new Error(response === null || response === void 0 ? void 0 : response.error);
+                if (!response || !response.albums)
+                    throw new Error("Error fetching album by ID");
+                return response.albums;
+            }
+            catch (error) {
+                console.error("Error fetching album by ID:", error);
+                throw error;
+            }
+        });
+    }
+    fetchGenreForSong(songId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.verifyTokenValid(); // Asegurar que el token es válido
+            try {
+                const songDetailsResponse = yield (0, Fetcho_1.default)({
+                    url: `${enums_1.URLS.SPOTIFY_TRACKS}/${songId}`,
+                    method: "GET",
+                    headers: this.headers,
+                });
+                if (!songDetailsResponse || !songDetailsResponse.artists || songDetailsResponse.artists.length === 0) {
+                    throw new Error("No artist information found for song");
+                }
+                const artistId = songDetailsResponse.artists[0].id; // Asumiendo el primer artista
+                // Paso 2: Obtener detalles del artista para extraer los géneros
+                const artistDetailsResponse = yield (0, Fetcho_1.default)({
+                    url: `${enums_1.URLS.SPOTIFY_ARTISTS}/${artistId}`,
+                    method: "GET",
+                    headers: this.headers,
+                });
+                if (!artistDetailsResponse || !artistDetailsResponse.genres) {
+                    throw new Error("No genre information found for artist");
+                }
+                return artistDetailsResponse.genres;
+            }
+            catch (error) {
+                console.error("Error fetching genre for song:", error);
+                throw error;
+            }
+        });
+    }
+    getArtistInfoById(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.verifyTokenValid();
+            try {
+                const response = (yield (0, Fetcho_1.default)({
+                    url: `${enums_1.URLS.SPOTIFY_ARTISTS}/${id}`,
+                    method: "GET",
+                    headers: this.headers,
+                }));
+                if (response === null || response === void 0 ? void 0 : response.error)
+                    throw new Error(response === null || response === void 0 ? void 0 : response.error);
+                if (!response || !response.genres)
+                    throw new Error("Error fetching artist info by ID");
+                return response;
+            }
+            catch (error) {
+                console.error("Error fetching artist info by ID:", error);
+                throw error;
+            }
+        });
+    }
+    getTopAlbums(_a) {
+        return __awaiter(this, arguments, void 0, function* ({ country = 'US', limit = 10, }) {
+            yield this.verifyTokenValid();
+            try {
+                const url = `${enums_1.URLS.SPOTIFY_BROWSE}/new-releases?country=${country}&limit=${limit}`;
+                const response = (yield (0, Fetcho_1.default)({
+                    url: url,
+                    method: "GET",
+                    headers: this.headers,
+                }));
+                if (response === null || response === void 0 ? void 0 : response.error)
+                    throw new Error(response === null || response === void 0 ? void 0 : response.error);
+                if (!response || !response.albums)
+                    throw new Error("Error fetching top albums");
+                return response.albums;
+            }
+            catch (error) {
+                console.error("Error fetching top albums:", error);
+                throw error;
+            }
+        });
+    }
+    getAlbumTracks(_a) {
+        return __awaiter(this, arguments, void 0, function* ({ id }) {
+            yield this.verifyTokenValid();
+            try {
+                const response = (yield (0, Fetcho_1.default)({
+                    url: `${enums_1.URLS.SPOTIFY_API}v1/albums/${id}/tracks`,
+                    method: "GET",
+                    headers: this.headers,
+                }));
+                if (response === null || response === void 0 ? void 0 : response.error)
+                    throw new Error(response === null || response === void 0 ? void 0 : response.error);
+                if (!response || !response.items)
+                    throw new Error("Error fetching album tracks");
+                return response.items;
+            }
+            catch (error) {
+                console.error("Error fetching album tracks:", error);
+                throw error;
+            }
+        });
+    }
+}
+exports.default = SpotifyAPIManager;
