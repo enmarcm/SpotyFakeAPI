@@ -331,5 +331,51 @@ class SpotifyAPIManager {
             }
         });
     }
+    getTopTracks(_a) {
+        return __awaiter(this, arguments, void 0, function* ({ country = 'US', limit = 10, }) {
+            yield this.verifyTokenValid();
+            try {
+                const url = `${enums_1.URLS.SPOTIFY_BROWSE}/featured-playlists?country=${country}&limit=${limit}`;
+                const response = (yield (0, Fetcho_1.default)({
+                    url: url,
+                    method: "GET",
+                    headers: this.headers,
+                }));
+                if (response === null || response === void 0 ? void 0 : response.error)
+                    throw new Error(response === null || response === void 0 ? void 0 : response.error);
+                if (!response || !response.playlists || !response.playlists.items)
+                    throw new Error("Error fetching top tracks");
+                const playlistId = response.playlists.items[0].id;
+                const tracksResponse = yield (0, Fetcho_1.default)({
+                    url: `${enums_1.URLS.SPOTIFY_PLAYLISTS}/${playlistId}/tracks`,
+                    method: "GET",
+                    headers: this.headers,
+                });
+                if (tracksResponse === null || tracksResponse === void 0 ? void 0 : tracksResponse.error)
+                    throw new Error(tracksResponse === null || tracksResponse === void 0 ? void 0 : tracksResponse.error);
+                if (!tracksResponse || !tracksResponse.items)
+                    throw new Error("Error fetching tracks from playlist");
+                const formattedTracks = tracksResponse.items.map((item) => {
+                    var _a;
+                    return ({
+                        _id: item.track.id,
+                        idArtist: item.track.artists.map((artist) => artist.id),
+                        artistNames: item.track.artists.map((artist) => artist.name),
+                        name: item.track.name,
+                        duration: item.track.duration_ms,
+                        urlImage: (_a = item.track.album.images[0]) === null || _a === void 0 ? void 0 : _a.url,
+                        urlSong: item.track.preview_url,
+                        date: item.track.album.release_date,
+                        albumName: item.track.album.name,
+                    });
+                });
+                return formattedTracks;
+            }
+            catch (error) {
+                console.error("Error fetching top tracks:", error);
+                throw error;
+            }
+        });
+    }
 }
 exports.default = SpotifyAPIManager;

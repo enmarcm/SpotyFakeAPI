@@ -150,5 +150,16 @@ class SongsController {
             }
         });
     }
+    static getTopSongs(_req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const response = yield instances_1.ISpotifyAPIManager.getTopTracks({});
+                return res.json(response);
+            }
+            catch (error) {
+                throw new Error(`An error occurred while fetching the top songs. Error: ${error}`);
+            }
+        });
+    }
 }
 exports.default = SongsController;

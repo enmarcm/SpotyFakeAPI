@@ -372,6 +372,60 @@ class SpotifyAPIManager {
     }
   }
 
+  public async getTopTracks({
+    country = 'US',
+    limit = 10,
+  }: {
+    country?: string;
+    limit?: number;
+  }) {
+    await this.verifyTokenValid();
+  
+    try {
+      const url = `${URLS.SPOTIFY_BROWSE}/featured-playlists?country=${country}&limit=${limit}`;
+  
+      const response = (await fetcho({
+        url: url,
+        method: "GET",
+        headers: this.headers,
+      })) as any;
+  
+      if (response?.error) throw new Error(response?.error);
+  
+      if (!response || !response.playlists || !response.playlists.items)
+        throw new Error("Error fetching top tracks");
+  
+      const playlistId = response.playlists.items[0].id;
+      const tracksResponse = await fetcho({
+        url: `${URLS.SPOTIFY_PLAYLISTS}/${playlistId}/tracks`,
+        method: "GET",
+        headers: this.headers,
+      }) as any;
+  
+
+      if (tracksResponse?.error) throw new Error(tracksResponse?.error);
+  
+      if (!tracksResponse || !tracksResponse.items)
+        throw new Error("Error fetching tracks from playlist");
+  
+      const formattedTracks = tracksResponse.items.map((item : any) => ({
+        _id: item.track.id,
+        idArtist: item.track.artists.map((artist: any) => artist.id),
+        artistNames: item.track.artists.map((artist: any) => artist.name),
+        name: item.track.name,
+        duration: item.track.duration_ms,
+        urlImage: item.track.album.images[0]?.url,
+        urlSong: item.track.preview_url,
+        date: item.track.album.release_date,
+        albumName: item.track.album.name,
+      }));
+  
+      return formattedTracks;
+    } catch (error) {
+      console.error("Error fetching top tracks:", error);
+      throw error;
+    }
+  }
   
 }
 

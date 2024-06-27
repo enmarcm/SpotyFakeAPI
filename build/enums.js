@@ -22,6 +22,7 @@ exports.URLS = {
     SPOTIFY_TRACKS: "https://api.spotify.com/v1/tracks",
     SPOTIFY_BROWSE: "https://api.spotify.com/v1/browse",
     SPOTIFY_BASE_URL: "https://api.spotify.com/v1",
+    SPOTIFY_PLAYLISTS: "https://api.spotify.com/v1/playlists",
 };
 var Constants;
 (function (Constants) {

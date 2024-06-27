@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const songsController_1 = __importDefault(require("../controllers/songsController"));
 const songRouter = (0, express_1.Router)();
+songRouter.get("/top", songsController_1.default.getTopSongs);
 songRouter.get("/getById/:idSong", songsController_1.default.getSongById);
 songRouter.get("/:songName", songsController_1.default.getSongByName);
 songRouter.post("/getByGenre", songsController_1.default.getSongsByGenre);

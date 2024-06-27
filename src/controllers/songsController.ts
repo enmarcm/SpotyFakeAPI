@@ -157,6 +157,18 @@ class SongsController {
       });
     }
   }
+
+  static async getTopSongs(_req: Request, res: Response) {
+    try {
+      const response = await ISpotifyAPIManager.getTopTracks({});
+      
+      return res.json(response);
+    } catch (error) {
+      throw new Error(
+        `An error occurred while fetching the top songs. Error: ${error}`
+      );
+    }
+  }
 }
 
 export default SongsController;
