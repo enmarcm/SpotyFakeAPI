@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import ArtistModelClass from "../models/ArtistsModelClass";
+import { ISpotifyAPIManager } from "../data/instances";
 
 class ArtistController {
   static async getArtistsAll(_req: Request, res: Response) {
@@ -20,7 +21,7 @@ class ArtistController {
   static async getArtistById(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const response = await ArtistModelClass.getArtistById({ id });
+      const response = await ISpotifyAPIManager.getArtistById({ id });
 
       return res.json(response);
     } catch (error) {

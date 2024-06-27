@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const ArtistsModelClass_1 = __importDefault(require("../models/ArtistsModelClass"));
+const instances_1 = require("../data/instances");
 class ArtistController {
     static getArtistsAll(_req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -30,7 +31,7 @@ class ArtistController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { id } = req.params;
-                const response = yield ArtistsModelClass_1.default.getArtistById({ id });
+                const response = yield instances_1.ISpotifyAPIManager.getArtistById({ id });
                 return res.json(response);
             }
             catch (error) {
