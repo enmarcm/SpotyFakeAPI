@@ -68,13 +68,12 @@ class AlbumController {
                     const objectResult = {
                         name: item.name,
                         id: item.id,
-                        urlImage: item.images[0].url,
+                        urlImage: item.tracks[0].urlImage,
                         release_date: item.release_date,
                         total_tracks: item.total_tracks,
                         artists: item.artists,
                         songs: mappedAlbumSongs,
                     };
-                    console.log(objectResult);
                     return objectResult;
                 })));
                 const newMappedResult = yield mappedResult;

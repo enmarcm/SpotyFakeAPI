@@ -51,10 +51,11 @@ class AlbumController {
   static async getAlbumByIdArtist(req: Request, res: Response) {
     try {
       const { id } = req.params;
+      
       const result = await ISpotifyAPIManager.getAlbumsByArtistId({ id });
-
       const mappedResult = Promise.all(
         result.map(async (item: any) => {
+
           const albumSongs = await ISpotifyAPIManager.getAlbumTracks({
             id: item.id,
           });
@@ -67,18 +68,16 @@ class AlbumController {
               url_song: song.preview_url,
             };
           });
-
           const objectResult = {
             name: item.name,
             id: item.id,
-            urlImage: item.images[0].url,
+            urlImage: item.tracks[0].urlImage,
             release_date: item.release_date,
             total_tracks: item.total_tracks,
             artists: item.artists,
             songs: mappedAlbumSongs,
           };
 
-          console.log(objectResult);
           return objectResult;
         })
       );

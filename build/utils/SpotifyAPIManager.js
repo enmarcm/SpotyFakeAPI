@@ -317,7 +317,7 @@ class SpotifyAPIManager {
             yield this.verifyTokenValid();
             try {
                 const response = (yield (0, Fetcho_1.default)({
-                    url: `${enums_1.URLS.SPOTIFY_API}v1/albums/${id}/tracks`,
+                    url: `${enums_1.URLS.SPOTIFY_BASE_URL}/albums/${id}/tracks`,
                     method: "GET",
                     headers: this.headers,
                 }));
@@ -402,8 +402,8 @@ class SpotifyAPIManager {
                     }));
                     if (tracksResponse === null || tracksResponse === void 0 ? void 0 : tracksResponse.error)
                         throw new Error(tracksResponse === null || tracksResponse === void 0 ? void 0 : tracksResponse.error);
-                    // Construir un objeto con la información del álbum y sus tracks
                     return {
+                        id: album.id,
                         name: album.name,
                         releaseDate: album.release_date,
                         tracks: tracksResponse.items.map((track) => {
@@ -411,7 +411,9 @@ class SpotifyAPIManager {
                             return ({
                                 name: track.name,
                                 id: track.id,
-                                urlImage: (_a = track.album.images[0]) === null || _a === void 0 ? void 0 : _a.url,
+                                urlImage: (_a = album.images[0]) === null || _a === void 0 ? void 0 : _a.url,
+                                urlSong: track.preview_url ||
+                                    "https://p.scdn.co/mp3-preview/a5d0a3cba66dd86d55bc674fd7571a60cf3a147f?cid=ef93c1139a084b05b496c4c209d98afc",
                             });
                         }),
                     };
@@ -429,7 +431,7 @@ class SpotifyAPIManager {
             yield this.verifyTokenValid(); // Verificar el token de acceso
             try {
                 const limit = 8; // Número de canciones más populares que queremos obtener
-                const country = 'US'; // Especificar el país puede ser necesario para algunas APIs
+                const country = "US"; // Especificar el país puede ser necesario para algunas APIs
                 // Construir la URL para obtener las top tracks del artista
                 const url = `${enums_1.URLS.SPOTIFY_ARTISTS}/${id}/top-tracks?country=${country}`;
                 // Hacer la solicitud a la API de Spotify
@@ -444,7 +446,9 @@ class SpotifyAPIManager {
                 if (!response || !response.tracks)
                     throw new Error("Error fetching top tracks for artist ID");
                 // Formatear las tracks para devolver solo la información relevante
-                const formattedTracks = response.tracks.slice(0, limit).map((track) => {
+                const formattedTracks = response.tracks
+                    .slice(0, limit)
+                    .map((track) => {
                     var _a;
                     return ({
                         _id: track.id,

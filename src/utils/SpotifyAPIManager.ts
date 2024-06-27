@@ -356,7 +356,7 @@ class SpotifyAPIManager {
 
     try {
       const response = (await fetcho({
-        url: `${URLS.SPOTIFY_API}v1/albums/${id}/tracks`,
+        url: `${URLS.SPOTIFY_BASE_URL}/albums/${id}/tracks`,
         method: "GET",
         headers: this.headers,
       })) as any;
@@ -453,14 +453,17 @@ class SpotifyAPIManager {
 
           if (tracksResponse?.error) throw new Error(tracksResponse?.error);
 
-          // Construir un objeto con la información del álbum y sus tracks
           return {
+            id: album.id,
             name: album.name,
             releaseDate: album.release_date,
             tracks: tracksResponse.items.map((track: any) => ({
               name: track.name,
               id: track.id,
-              urlImage: track.album.images[0]?.url,
+              urlImage: album.images[0]?.url,
+              urlSong:
+                track.preview_url ||
+                "https://p.scdn.co/mp3-preview/a5d0a3cba66dd86d55bc674fd7571a60cf3a147f?cid=ef93c1139a084b05b496c4c209d98afc",
             })),
           };
         })
@@ -474,47 +477,49 @@ class SpotifyAPIManager {
   }
 
   public async getFamousSongByArtistId({ id }: { id: string }) {
-  await this.verifyTokenValid(); // Verificar el token de acceso
+    await this.verifyTokenValid(); // Verificar el token de acceso
 
-  try {
-    const limit = 8; // Número de canciones más populares que queremos obtener
-    const country = 'US'; // Especificar el país puede ser necesario para algunas APIs
+    try {
+      const limit = 8; // Número de canciones más populares que queremos obtener
+      const country = "US"; // Especificar el país puede ser necesario para algunas APIs
 
-    // Construir la URL para obtener las top tracks del artista
-    const url = `${URLS.SPOTIFY_ARTISTS}/${id}/top-tracks?country=${country}`;
+      // Construir la URL para obtener las top tracks del artista
+      const url = `${URLS.SPOTIFY_ARTISTS}/${id}/top-tracks?country=${country}`;
 
-    // Hacer la solicitud a la API de Spotify
-    const response = (await fetcho({
-      url: url,
-      method: "GET",
-      headers: this.headers,
-    })) as any;
+      // Hacer la solicitud a la API de Spotify
+      const response = (await fetcho({
+        url: url,
+        method: "GET",
+        headers: this.headers,
+      })) as any;
 
-    if (response?.error) throw new Error(response?.error);
+      if (response?.error) throw new Error(response?.error);
 
-    // Verificar que la respuesta contenga tracks
-    if (!response || !response.tracks)
-      throw new Error("Error fetching top tracks for artist ID");
+      // Verificar que la respuesta contenga tracks
+      if (!response || !response.tracks)
+        throw new Error("Error fetching top tracks for artist ID");
 
-    // Formatear las tracks para devolver solo la información relevante
-    const formattedTracks = response.tracks.slice(0, limit).map((track: any) => ({
-      _id: track.id,
-      idArtist: track.artists.map((artist: any) => artist.id),
-      artistNames: track.artists.map((artist: any) => artist.name),
-      name: track.name,
-      duration: track.duration_ms,
-      urlImage: track.album.images[0]?.url,
-      urlSong: track.preview_url,
-      date: track.album.release_date,
-      albumName: track.album.name,
-    }));
+      // Formatear las tracks para devolver solo la información relevante
+      const formattedTracks = response.tracks
+        .slice(0, limit)
+        .map((track: any) => ({
+          _id: track.id,
+          idArtist: track.artists.map((artist: any) => artist.id),
+          artistNames: track.artists.map((artist: any) => artist.name),
+          name: track.name,
+          duration: track.duration_ms,
+          urlImage: track.album.images[0]?.url,
+          urlSong: track.preview_url,
+          date: track.album.release_date,
+          albumName: track.album.name,
+        }));
 
-    return formattedTracks;
-  } catch (error) {
-    console.error("Error fetching famous songs by artist ID:", error);
-    throw error;
+      return formattedTracks;
+    } catch (error) {
+      console.error("Error fetching famous songs by artist ID:", error);
+      throw error;
+    }
   }
-}
 }
 
 export default SpotifyAPIManager;
