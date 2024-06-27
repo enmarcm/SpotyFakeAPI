@@ -118,14 +118,16 @@ class SongsController {
 
       const song = await ISpotifyAPIManager.getSongById({ id: idSong });
 
-      console.log(song)
-      
+      console.log(song);
+
       const mappedSong = {
         name: song.name,
         id: song.id,
         duration_ms: song.duration_ms,
         urlImage: song.album.images[0].url,
-        url_song: song.preview_url,
+        url_song:
+          song.preview_url ||
+          "https://p.scdn.co/mp3-preview/23de3926689af61772c7ccb7c7110b1f4643ddf4?cid=cfe923b2d660439caf2b557b21f31221",
       };
 
       return res.json(mappedSong);

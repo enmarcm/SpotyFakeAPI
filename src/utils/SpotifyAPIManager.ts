@@ -170,7 +170,6 @@ class SpotifyAPIManager {
       if (!response )
         throw new Error("Error fetching song by ID");
 
-      console.log(response)
       return response;
     } catch (error) {
       console.error("Error fetching song by ID:", error);
