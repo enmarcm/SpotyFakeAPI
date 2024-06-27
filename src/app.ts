@@ -9,7 +9,6 @@ import {
   midNotJson,
   midValidJson,
   midErrorHandler,
-  midToken,
 } from "./middlewares/middlewares";
 import R from "./routers/allRouters";
 import { Routes } from "./enums";
