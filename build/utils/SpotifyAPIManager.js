@@ -221,15 +221,15 @@ class SpotifyAPIManager {
             yield this.verifyTokenValid();
             try {
                 const response = (yield (0, Fetcho_1.default)({
-                    url: `${enums_1.URLS.SPOTIFY_SEARCH}?q=id:${id}&type=album`,
+                    url: `${enums_1.URLS.SPOTIFY_ALBUMS}/${id}`,
                     method: "GET",
                     headers: this.headers,
                 }));
                 if (response === null || response === void 0 ? void 0 : response.error)
                     throw new Error(response === null || response === void 0 ? void 0 : response.error);
-                if (!response || !response.albums)
+                if (!response)
                     throw new Error("Error fetching album by ID");
-                return response.albums;
+                return response;
             }
             catch (error) {
                 console.error("Error fetching album by ID:", error);

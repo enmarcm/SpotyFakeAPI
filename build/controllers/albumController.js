@@ -89,5 +89,38 @@ class AlbumController {
             }
         });
     }
+    static getAlbumById(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { id } = req.params;
+                const result = yield instances_1.ISpotifyAPIManager.getAlbumById({ id });
+                const albumSongs = yield instances_1.ISpotifyAPIManager.getAlbumTracks({
+                    id,
+                });
+                const mappedAlbumSongs = albumSongs.map((song) => {
+                    return {
+                        name: song.name,
+                        id: song.id,
+                        duration_ms: song.duration_ms,
+                        url_song: song.preview_url,
+                    };
+                });
+                const objectResult = {
+                    name: result.name,
+                    id: result.id,
+                    urlImage: result.images[0].url,
+                    release_date: result.release_date,
+                    total_tracks: result.total_tracks,
+                    artists: result.artists,
+                    songs: mappedAlbumSongs,
+                };
+                return res.json(objectResult);
+            }
+            catch (error) {
+                console.error(`An error occurred while fetching the album by id. Error: ${error}`);
+                throw new Error(`An error occurred while fetching the album by id. Error: ${error}`);
+            }
+        });
+    }
 }
 exports.default = AlbumController;

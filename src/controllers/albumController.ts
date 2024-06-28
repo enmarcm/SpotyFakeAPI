@@ -96,6 +96,45 @@ class AlbumController {
       );
     }
   }
+
+  static async getAlbumById(req: Request, res: Response){
+    try {
+      const { id } = req.params;
+      const result = await ISpotifyAPIManager.getAlbumById({ id });
+
+      const albumSongs = await ISpotifyAPIManager.getAlbumTracks({
+        id,
+      });
+
+      const mappedAlbumSongs = albumSongs.map((song: any) => {
+        return {
+          name: song.name,
+          id: song.id,
+          duration_ms: song.duration_ms,
+          url_song: song.preview_url,
+        };
+      });
+
+      const objectResult = {
+        name: result.name,
+        id: result.id,
+        urlImage: result.images[0].url,
+        release_date: result.release_date,
+        total_tracks: result.total_tracks,
+        artists: result.artists,
+        songs: mappedAlbumSongs,
+      };
+
+      return res.json(objectResult);
+    } catch (error) {
+      console.error(
+        `An error occurred while fetching the album by id. Error: ${error}`
+      );
+      throw new Error(
+        `An error occurred while fetching the album by id. Error: ${error}`
+      );
+    }
+  }
 }
 
 export default AlbumController;

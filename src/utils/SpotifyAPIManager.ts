@@ -244,17 +244,17 @@ class SpotifyAPIManager {
 
     try {
       const response = (await fetcho({
-        url: `${URLS.SPOTIFY_SEARCH}?q=id:${id}&type=album`,
+        url: `${URLS.SPOTIFY_ALBUMS}/${id}`,
         method: "GET",
         headers: this.headers,
       })) as any;
 
       if (response?.error) throw new Error(response?.error);
 
-      if (!response || !response.albums)
+      if (!response)
         throw new Error("Error fetching album by ID");
 
-      return response.albums;
+      return response;
     } catch (error) {
       console.error("Error fetching album by ID:", error);
       throw error;
@@ -520,6 +520,8 @@ class SpotifyAPIManager {
       throw error;
     }
   }
+
+ 
 }
 
 export default SpotifyAPIManager;
