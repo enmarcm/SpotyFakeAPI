@@ -52,7 +52,11 @@ class AlbumController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { id } = req.params;
-                const result = yield instances_1.ISpotifyAPIManager.getAlbumsByArtistId({ id });
+                const { limit } = req.query;
+                const result = yield instances_1.ISpotifyAPIManager.getAlbumsByArtistId({
+                    id,
+                    limit,
+                });
                 const mappedResult = Promise.all(result.map((item) => __awaiter(this, void 0, void 0, function* () {
                     const albumSongs = yield instances_1.ISpotifyAPIManager.getAlbumTracks({
                         id: item.id,

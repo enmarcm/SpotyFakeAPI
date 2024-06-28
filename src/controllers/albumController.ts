@@ -51,11 +51,14 @@ class AlbumController {
   static async getAlbumByIdArtist(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      
-      const result = await ISpotifyAPIManager.getAlbumsByArtistId({ id });
+      const { limit } = req.query as any;
+
+      const result = await ISpotifyAPIManager.getAlbumsByArtistId({
+        id,
+        limit,
+      });
       const mappedResult = Promise.all(
         result.map(async (item: any) => {
-
           const albumSongs = await ISpotifyAPIManager.getAlbumTracks({
             id: item.id,
           });

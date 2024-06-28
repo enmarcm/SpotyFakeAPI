@@ -291,7 +291,7 @@ class SpotifyAPIManager {
         });
     }
     getTopAlbums(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ country = "US", limit = 10, }) {
+        return __awaiter(this, arguments, void 0, function* ({ country = "US", limit = 6, }) {
             yield this.verifyTokenValid();
             try {
                 const url = `${enums_1.URLS.SPOTIFY_BROWSE}/new-releases?country=${country}&limit=${limit}`;
@@ -334,7 +334,7 @@ class SpotifyAPIManager {
         });
     }
     getTopTracks(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ country = "US", limit = 10, }) {
+        return __awaiter(this, arguments, void 0, function* ({ country = "US", limit = 6, }) {
             yield this.verifyTokenValid();
             try {
                 const url = `${enums_1.URLS.SPOTIFY_BROWSE}/featured-playlists?country=${country}&limit=${limit}`;
@@ -380,11 +380,11 @@ class SpotifyAPIManager {
         });
     }
     getAlbumsByArtistId(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ id }) {
+        return __awaiter(this, arguments, void 0, function* ({ id, limit }) {
             yield this.verifyTokenValid();
             try {
                 const response = (yield (0, Fetcho_1.default)({
-                    url: `${enums_1.URLS.SPOTIFY_ARTISTS}/${id}/albums`,
+                    url: `${enums_1.URLS.SPOTIFY_ARTISTS}/${id}/albums?limit=${limit}`,
                     method: "GET",
                     headers: this.headers,
                 }));

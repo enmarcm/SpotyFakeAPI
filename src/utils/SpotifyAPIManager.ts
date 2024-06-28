@@ -323,7 +323,7 @@ class SpotifyAPIManager {
 
   public async getTopAlbums({
     country = "US",
-    limit = 10,
+    limit = 6,
   }: {
     country?: string;
     limit?: number;
@@ -375,7 +375,7 @@ class SpotifyAPIManager {
 
   public async getTopTracks({
     country = "US",
-    limit = 10,
+    limit = 6,
   }: {
     country?: string;
     limit?: number;
@@ -427,12 +427,12 @@ class SpotifyAPIManager {
     }
   }
 
-  public async getAlbumsByArtistId({ id }: { id: string }) {
+  public async getAlbumsByArtistId({ id, limit }: {limit: number, id: string }) {
     await this.verifyTokenValid();
 
     try {
       const response = (await fetcho({
-        url: `${URLS.SPOTIFY_ARTISTS}/${id}/albums`,
+        url: `${URLS.SPOTIFY_ARTISTS}/${id}/albums?limit=${limit}`,
         method: "GET",
         headers: this.headers,
       })) as any;
