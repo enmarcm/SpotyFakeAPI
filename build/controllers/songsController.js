@@ -161,7 +161,6 @@ class SongsController {
             }
         });
     }
-    // Comentario
     static getTopArtistSongs(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -172,6 +171,18 @@ class SongsController {
             catch (error) {
                 console.error(`An error occurred while fetching the top songs. Error: ${error}`);
                 throw new Error(`An error occurred while fetching the top songs. Error: ${error}`);
+            }
+        });
+    }
+    static getGenres(_req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const response = yield instances_1.ISpotifyAPIManager.obtainGenres();
+                return res.json(response);
+            }
+            catch (error) {
+                console.error(`Ocurrio un error en getGenres: ${error}`);
+                throw new Error(`Ocurrio un error en getGenres: ${error}`);
             }
         });
     }

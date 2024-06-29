@@ -96,6 +96,26 @@ class SpotifyAPIManager {
     }
   }
 
+  public async obtainGenres() {
+    await this.verifyTokenValid();
+  
+    try {
+      const response = await fetcho({
+        url: `https://api.spotify.com/v1/recommendations/available-genre-seeds`,
+        method: "GET",
+        headers: this.headers,
+      }) as any;
+  
+      if (response?.error) throw new Error(response?.error);
+  
+      // Devolver solo los nombres de los géneros
+      return response.genres;
+    } catch (error) {
+      console.error("Error obtaining genres:", error);
+      throw error;
+    }
+  }
+
   public async getSongByGenre({
     genre,
     artistLimit = 5,

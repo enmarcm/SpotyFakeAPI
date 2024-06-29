@@ -92,6 +92,26 @@ class SpotifyAPIManager {
             }
         });
     }
+    obtainGenres() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.verifyTokenValid();
+            try {
+                const response = yield (0, Fetcho_1.default)({
+                    url: `https://api.spotify.com/v1/recommendations/available-genre-seeds`,
+                    method: "GET",
+                    headers: this.headers,
+                });
+                if (response === null || response === void 0 ? void 0 : response.error)
+                    throw new Error(response === null || response === void 0 ? void 0 : response.error);
+                // Devolver solo los nombres de los géneros
+                return response.genres;
+            }
+            catch (error) {
+                console.error("Error obtaining genres:", error);
+                throw error;
+            }
+        });
+    }
     getSongByGenre(_a) {
         return __awaiter(this, arguments, void 0, function* ({ genre, artistLimit = 5, trackLimit = 10, }) {
             yield this.verifyTokenValid();

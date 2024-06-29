@@ -170,7 +170,6 @@ class SongsController {
     }
   }
 
-  // Comentario
   static async getTopArtistSongs(req: Request, res: Response) {
     try {
       const { id } = req.params;
@@ -184,6 +183,16 @@ class SongsController {
       throw new Error(
         `An error occurred while fetching the top songs. Error: ${error}`
       );
+    }
+  }
+
+  static async getGenres(_req: Request, res: Response) {
+    try {
+      const response = await ISpotifyAPIManager.obtainGenres();
+      return res.json(response);
+    } catch (error) {
+      console.error(`Ocurrio un error en getGenres: ${error}`);
+      throw new Error(`Ocurrio un error en getGenres: ${error}`);
     }
   }
 }
