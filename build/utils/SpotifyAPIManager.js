@@ -220,6 +220,7 @@ class SpotifyAPIManager {
         return __awaiter(this, arguments, void 0, function* ({ id }) {
             yield this.verifyTokenValid();
             try {
+                // Paso 1: Obtener los detalles del álbum
                 const response = (yield (0, Fetcho_1.default)({
                     url: `${enums_1.URLS.SPOTIFY_ALBUMS}/${id}`,
                     method: "GET",
@@ -229,7 +230,18 @@ class SpotifyAPIManager {
                     throw new Error(response === null || response === void 0 ? void 0 : response.error);
                 if (!response)
                     throw new Error("Error fetching album by ID");
-                return response;
+                const artistsWithImages = yield Promise.all(response.artists.map((artist) => __awaiter(this, void 0, void 0, function* () {
+                    var _b;
+                    const artistDetails = (yield (0, Fetcho_1.default)({
+                        url: `https://api.spotify.com/v1/artists/${artist.id}`,
+                        method: "GET",
+                        headers: this.headers,
+                    }));
+                    const imageUrl = ((_b = artistDetails.images[0]) === null || _b === void 0 ? void 0 : _b.url) || "URL de imagen por defecto";
+                    return Object.assign(Object.assign({}, artist), { imageUrl });
+                })));
+                const modifiedResponse = Object.assign(Object.assign({}, response), { artists: artistsWithImages });
+                return modifiedResponse;
             }
             catch (error) {
                 console.error("Error fetching album by ID:", error);
@@ -380,7 +392,7 @@ class SpotifyAPIManager {
         });
     }
     getAlbumsByArtistId(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ id, limit }) {
+        return __awaiter(this, arguments, void 0, function* ({ id, limit, }) {
             yield this.verifyTokenValid();
             try {
                 const response = (yield (0, Fetcho_1.default)({

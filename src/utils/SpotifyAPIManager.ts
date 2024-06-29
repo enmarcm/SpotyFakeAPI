@@ -243,6 +243,7 @@ class SpotifyAPIManager {
     await this.verifyTokenValid();
 
     try {
+      // Paso 1: Obtener los detalles del álbum
       const response = (await fetcho({
         url: `${URLS.SPOTIFY_ALBUMS}/${id}`,
         method: "GET",
@@ -250,11 +251,32 @@ class SpotifyAPIManager {
       })) as any;
 
       if (response?.error) throw new Error(response?.error);
+      if (!response) throw new Error("Error fetching album by ID");
 
-      if (!response)
-        throw new Error("Error fetching album by ID");
+      const artistsWithImages = await Promise.all(
+        response.artists.map(async (artist: any) => {
+          const artistDetails = (await fetcho({
+            url: `https://api.spotify.com/v1/artists/${artist.id}`,
+            method: "GET",
+            headers: this.headers,
+          })) as any;
 
-      return response;
+          const imageUrl =
+            artistDetails.images[0]?.url || "URL de imagen por defecto";
+
+          return {
+            ...artist,
+            imageUrl,
+          };
+        })
+      );
+
+      const modifiedResponse = {
+        ...response,
+        artists: artistsWithImages,
+      };
+
+      return modifiedResponse;
     } catch (error) {
       console.error("Error fetching album by ID:", error);
       throw error;
@@ -427,7 +449,13 @@ class SpotifyAPIManager {
     }
   }
 
-  public async getAlbumsByArtistId({ id, limit }: {limit: number, id: string }) {
+  public async getAlbumsByArtistId({
+    id,
+    limit,
+  }: {
+    limit: number;
+    id: string;
+  }) {
     await this.verifyTokenValid();
 
     try {
@@ -520,8 +548,6 @@ class SpotifyAPIManager {
       throw error;
     }
   }
-
- 
 }
 
 export default SpotifyAPIManager;
