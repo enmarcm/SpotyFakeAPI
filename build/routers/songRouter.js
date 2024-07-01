@@ -9,7 +9,7 @@ const songRouter = (0, express_1.Router)();
 songRouter.get("/top", songsController_1.default.getTopSongs);
 songRouter.get("/getById/:idSong", songsController_1.default.getSongById);
 songRouter.get("/genres", songsController_1.default.getGenres);
-songRouter.post("/getByGenre/genre", songsController_1.default.getSongsByGenre);
+songRouter.post("/getByGenre/:genre", songsController_1.default.getSongsByGenre);
 songRouter.get("/:songName", songsController_1.default.getSongByName);
 songRouter.post("/add", songsController_1.default.addSong);
 songRouter.delete("/delete/:id", songsController_1.default.deleteSong);
