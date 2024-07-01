@@ -105,7 +105,22 @@ class SongsController {
                 if (!genre)
                     return res.status(400).json({ error: "Genre is required" });
                 const songs = yield instances_1.ISpotifyAPIManager.getSongByGenre({ genre, page });
-                return res.json(songs);
+                const parsedSongs = songs.map((song) => {
+                    const newValues = {
+                        idSong: song.id,
+                        name: song.name,
+                        duration: song.duration_ms,
+                        urlImage: song.album.images[0].url,
+                        urlSong: song.preview_url ||
+                            "https://p.scdn.co/mp3-preview/23de3926689af61772c7ccb7c7110b1f4643ddf4?cid=cfe923b2d660439caf2b557b21f31221",
+                        artists: song.artists.map((artist) => ({
+                            id: artist.id,
+                            name: artist.name,
+                        })),
+                    };
+                    return newValues;
+                });
+                return res.json(parsedSongs);
             }
             catch (error) {
                 console.error(error);
