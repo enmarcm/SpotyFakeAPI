@@ -76,7 +76,7 @@ class SongsController {
     static getSongsByGenre(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { genre } = req.body;
+                const { genre } = req.params;
                 const page = parseInt(req.query.page) || 1;
                 const limit = parseInt(req.query.limit) || 5;
                 if (!genre)

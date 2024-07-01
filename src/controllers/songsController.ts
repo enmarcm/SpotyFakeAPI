@@ -70,7 +70,7 @@ class SongsController {
 
   static async getSongsByGenre(req: Request, res: Response) {
     try {
-      const { genre } = req.body;
+      const { genre } = req.params;
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 5;
 

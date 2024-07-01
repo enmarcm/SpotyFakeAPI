@@ -98,16 +98,16 @@ class SpotifyAPIManager {
 
   public async obtainGenres() {
     await this.verifyTokenValid();
-  
+
     try {
-      const response = await fetcho({
+      const response = (await fetcho({
         url: `https://api.spotify.com/v1/recommendations/available-genre-seeds`,
         method: "GET",
         headers: this.headers,
-      }) as any;
-  
+      })) as any;
+
       if (response?.error) throw new Error(response?.error);
-  
+
       // Devolver solo los nombres de los géneros
       return response.genres;
     } catch (error) {
@@ -115,23 +115,29 @@ class SpotifyAPIManager {
       throw error;
     }
   }
-
   public async getSongByGenre({
     genre,
+    page = 1,
     artistLimit = 5,
     trackLimit = 10,
   }: {
     genre: string;
+    page?: number;
     artistLimit?: number;
     trackLimit?: number;
   }) {
     await this.verifyTokenValid();
 
+    const totalSongLimit = 30; // Límite de canciones por página
+    const offset = (page - 1) * totalSongLimit; // Calcular el offset basado en la página
+
     try {
-      // Paso 1: Buscar artistas por género
+      // Paso 1: Buscar artistas por género con paginación
       const artistSearchUrl = `${
         URLS.SPOTIFY_SEARCH
-      }?q=genre:${encodeURIComponent(genre)}&type=artist&limit=${artistLimit}`;
+      }?q=genre:${encodeURIComponent(
+        genre
+      )}&type=artist&limit=${artistLimit}&offset=${offset}`;
       const artistResponse = (await fetcho({
         url: artistSearchUrl,
         method: "GET",
@@ -149,7 +155,7 @@ class SpotifyAPIManager {
       // Paso 2: Obtener las canciones más populares de los artistas encontrados
       const tracks = [];
       for (const artist of artistResponse.artists.items) {
-        const topTracksUrl = `${URLS.SPOTIFY_ARTISTS}/${artist.id}/top-tracks?market=US`;
+        const topTracksUrl = `${URLS.SPOTIFY_ARTISTS}/${artist.id}/top-tracks?market=US&limit=${trackLimit}`;
         const topTracksResponse = (await fetcho({
           url: topTracksUrl,
           method: "GET",
@@ -157,13 +163,13 @@ class SpotifyAPIManager {
         })) as any;
 
         if (topTracksResponse?.error) throw new Error(topTracksResponse?.error);
-
         if (!topTracksResponse || !topTracksResponse.tracks)
           throw new Error(
             `Error fetching top tracks for artist ${artist.name}`
           );
 
         tracks.push(...topTracksResponse.tracks.slice(0, trackLimit));
+        if (tracks.length >= totalSongLimit) break; // Asegurar no exceder el límite de canciones por página
       }
 
       return tracks;

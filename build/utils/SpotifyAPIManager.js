@@ -96,11 +96,11 @@ class SpotifyAPIManager {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.verifyTokenValid();
             try {
-                const response = yield (0, Fetcho_1.default)({
+                const response = (yield (0, Fetcho_1.default)({
                     url: `https://api.spotify.com/v1/recommendations/available-genre-seeds`,
                     method: "GET",
                     headers: this.headers,
-                });
+                }));
                 if (response === null || response === void 0 ? void 0 : response.error)
                     throw new Error(response === null || response === void 0 ? void 0 : response.error);
                 // Devolver solo los nombres de los géneros
@@ -113,11 +113,13 @@ class SpotifyAPIManager {
         });
     }
     getSongByGenre(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ genre, artistLimit = 5, trackLimit = 10, }) {
+        return __awaiter(this, arguments, void 0, function* ({ genre, page = 1, artistLimit = 5, trackLimit = 10, }) {
             yield this.verifyTokenValid();
+            const totalSongLimit = 30; // Límite de canciones por página
+            const offset = (page - 1) * totalSongLimit; // Calcular el offset basado en la página
             try {
-                // Paso 1: Buscar artistas por género
-                const artistSearchUrl = `${enums_1.URLS.SPOTIFY_SEARCH}?q=genre:${encodeURIComponent(genre)}&type=artist&limit=${artistLimit}`;
+                // Paso 1: Buscar artistas por género con paginación
+                const artistSearchUrl = `${enums_1.URLS.SPOTIFY_SEARCH}?q=genre:${encodeURIComponent(genre)}&type=artist&limit=${artistLimit}&offset=${offset}`;
                 const artistResponse = (yield (0, Fetcho_1.default)({
                     url: artistSearchUrl,
                     method: "GET",
@@ -132,7 +134,7 @@ class SpotifyAPIManager {
                 // Paso 2: Obtener las canciones más populares de los artistas encontrados
                 const tracks = [];
                 for (const artist of artistResponse.artists.items) {
-                    const topTracksUrl = `${enums_1.URLS.SPOTIFY_ARTISTS}/${artist.id}/top-tracks?market=US`;
+                    const topTracksUrl = `${enums_1.URLS.SPOTIFY_ARTISTS}/${artist.id}/top-tracks?market=US&limit=${trackLimit}`;
                     const topTracksResponse = (yield (0, Fetcho_1.default)({
                         url: topTracksUrl,
                         method: "GET",
@@ -143,6 +145,8 @@ class SpotifyAPIManager {
                     if (!topTracksResponse || !topTracksResponse.tracks)
                         throw new Error(`Error fetching top tracks for artist ${artist.name}`);
                     tracks.push(...topTracksResponse.tracks.slice(0, trackLimit));
+                    if (tracks.length >= totalSongLimit)
+                        break; // Asegurar no exceder el límite de canciones por página
                 }
                 return tracks;
             }
