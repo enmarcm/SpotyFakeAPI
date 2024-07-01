@@ -21,7 +21,7 @@ class SongsController {
             try {
                 const { songName } = req.params;
                 const page = parseInt(req.query.page) || 1;
-                const limit = parseInt(req.query.limit) || 5;
+                const limit = parseInt(req.query.limit) || 15;
                 if (!songName)
                     return res.status(400).json({ error: "Song name is required" });
                 const songs = yield SongsModel_1.default.getSongByName({

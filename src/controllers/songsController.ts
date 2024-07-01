@@ -8,7 +8,7 @@ class SongsController {
     try {
       const { songName } = req.params;
       const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 5;
+      const limit = parseInt(req.query.limit as string) || 15;
 
       if (!songName)
         return res.status(400).json({ error: "Song name is required" });
