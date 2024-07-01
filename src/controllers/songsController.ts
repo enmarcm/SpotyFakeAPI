@@ -93,6 +93,24 @@ class SongsController {
     }
   }
 
+  static async getSongsByGenre2(req: Request, res: Response) {
+    try {
+      const { genre } = req.params;
+      const page = parseInt(req.query.page as string) || 1;
+
+      if (!genre) return res.status(400).json({ error: "Genre is required" });
+
+      const songs = await ISpotifyAPIManager.getSongByGenre({ genre, page });
+
+      return res.json(songs);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        error: `An error occurred while searching for the songs. Error: ${error}`,
+      });
+    }
+  }
+
   static async deleteSong(req: Request, res: Response) {
     try {
       const { idSong } = req.params;

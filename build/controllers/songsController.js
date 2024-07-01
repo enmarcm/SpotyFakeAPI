@@ -97,6 +97,24 @@ class SongsController {
             }
         });
     }
+    static getSongsByGenre2(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { genre } = req.params;
+                const page = parseInt(req.query.page) || 1;
+                if (!genre)
+                    return res.status(400).json({ error: "Genre is required" });
+                const songs = yield instances_1.ISpotifyAPIManager.getSongByGenre({ genre, page });
+                return res.json(songs);
+            }
+            catch (error) {
+                console.error(error);
+                return res.status(500).json({
+                    error: `An error occurred while searching for the songs. Error: ${error}`,
+                });
+            }
+        });
+    }
     static deleteSong(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
