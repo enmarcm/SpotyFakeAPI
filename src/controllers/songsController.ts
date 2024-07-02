@@ -73,7 +73,7 @@ class SongsController {
     try {
       const { genre } = req.params;
       const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 5;
+      const limit = parseInt(req.query.limit as string) || 15;
 
       if (!genre) return res.status(400).json({ error: "Genre is required" });
 

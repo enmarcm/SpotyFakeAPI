@@ -162,6 +162,7 @@ class SpotifyAPIManager {
           headers: this.headers,
         })) as any;
 
+
         if (topTracksResponse?.error) throw new Error(topTracksResponse?.error);
         if (!topTracksResponse || !topTracksResponse.tracks)
           throw new Error(

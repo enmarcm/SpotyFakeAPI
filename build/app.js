@@ -20,7 +20,7 @@ app.use(middlewares_1.midConnectDB);
 //{ Routes
 app.use(enums_1.Routes.AUTH, allRouters_1.default.authRouter);
 app.use(enums_1.Routes.SONGS, allRouters_1.default.songRouter);
-app.use(enums_1.Routes.PLAYLIST, allRouters_1.default.playlistRouter);
+app.use(enums_1.Routes.PLAYLIST, middlewares_1.midToken, allRouters_1.default.playlistRouter);
 app.use(enums_1.Routes.PROFILE, allRouters_1.default.profileRouter);
 app.use(enums_1.Routes.ARTIST, allRouters_1.default.artistRouter);
 app.use(enums_1.Routes.ALBUM, allRouters_1.default.albumRouter);

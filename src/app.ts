@@ -9,6 +9,7 @@ import {
   midNotJson,
   midValidJson,
   midErrorHandler,
+  midToken,
 } from "./middlewares/middlewares";
 import R from "./routers/allRouters";
 import { Routes } from "./enums";
@@ -26,7 +27,7 @@ app.use(midConnectDB);
 //{ Routes
 app.use(Routes.AUTH, R.authRouter);
 app.use(Routes.SONGS, R.songRouter);
-app.use(Routes.PLAYLIST, R.playlistRouter);
+app.use(Routes.PLAYLIST, midToken,R.playlistRouter);
 app.use(Routes.PROFILE, R.profileRouter);
 app.use(Routes.ARTIST, R.artistRouter);
 app.use(Routes.ALBUM, R.albumRouter);
