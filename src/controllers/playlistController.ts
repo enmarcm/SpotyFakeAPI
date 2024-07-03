@@ -27,7 +27,7 @@ class PlaylistController {
     }
   }
 
-  static async getPlaylistById(req: Request, res: Response) {
+ static async getPlaylistById(req: Request, res: Response) {
     try {
       const { id } = req.params;
 
@@ -36,13 +36,11 @@ class PlaylistController {
 
       const playlist = await PlaylistModelClass.getPlaylistById({ id });
 
-      const playlistSongs = playlist.idSongs.map(async (idSong: string) => {
+      const playlistSongs = await Promise.all(playlist.idSongs.map(async (idSong: string) => {
         const song = await SongsModel.getSongById(idSong);
-
         console.log(song);
-
         return song;
-      });
+      }));
 
       const mappedItemPlaylist = {
         ...playlist,

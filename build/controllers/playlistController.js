@@ -45,11 +45,11 @@ class PlaylistController {
                 if (!id)
                     return res.status(400).json({ error: "Playlist ID is required" });
                 const playlist = yield PlaylistModelClass_1.default.getPlaylistById({ id });
-                const playlistSongs = playlist.idSongs.map((idSong) => __awaiter(this, void 0, void 0, function* () {
+                const playlistSongs = yield Promise.all(playlist.idSongs.map((idSong) => __awaiter(this, void 0, void 0, function* () {
                     const song = yield SongsModel_1.default.getSongById(idSong);
                     console.log(song);
                     return song;
-                }));
+                })));
                 const mappedItemPlaylist = Object.assign(Object.assign({}, playlist), { songs: playlistSongs });
                 return res.json(mappedItemPlaylist);
             }
