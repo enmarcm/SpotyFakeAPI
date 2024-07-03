@@ -34,16 +34,17 @@ class PlaylistController {
       if (!id)
         return res.status(400).json({ error: "Playlist ID is required" });
 
-      const playlist = await PlaylistModelClass.getPlaylistById({ id });
+      const playlist = await PlaylistModelClass.getPlaylistById({ id })
+      const newPlaylist = playlist.toJSON();
 
-      const playlistSongs = await Promise.all(playlist.idSongs.map(async (idSong: string) => {
+
+      const playlistSongs = await Promise.all(newPlaylist.idSongs.map(async (idSong: string) => {
         const song = await SongsModel.getSongById(idSong);
-        console.log(song);
         return song;
       }));
 
       const mappedItemPlaylist = {
-        ...playlist,
+        ...newPlaylist,
         songs: playlistSongs,
       };
 
