@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const PlaylistModelClass_1 = __importDefault(require("../models/PlaylistModelClass"));
+const SongsModel_1 = __importDefault(require("../models/SongsModel"));
 class PlaylistController {
     static createPlaylist(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -44,7 +45,13 @@ class PlaylistController {
                 if (!id)
                     return res.status(400).json({ error: "Playlist ID is required" });
                 const playlist = yield PlaylistModelClass_1.default.getPlaylistById({ id });
-                return res.json(playlist);
+                const playlistSongs = playlist.idSongs.map((idSong) => __awaiter(this, void 0, void 0, function* () {
+                    const song = yield SongsModel_1.default.getSongById(idSong);
+                    console.log(song);
+                    return song;
+                }));
+                const mappedItemPlaylist = Object.assign(Object.assign({}, playlist), { songs: playlistSongs });
+                return res.json(mappedItemPlaylist);
             }
             catch (error) {
                 console.error(error);

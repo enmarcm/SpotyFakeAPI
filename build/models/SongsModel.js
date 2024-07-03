@@ -120,6 +120,28 @@ class SongsModel {
             }
         });
     }
+    static getSongById(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const resultDB = yield instances_1.ITSGooseHandler.searchId({
+                    Model: models_1.SongModel,
+                    id
+                });
+                if (!resultDB || (resultDB === null || resultDB === void 0 ? void 0 : resultDB.length) === 0 || (resultDB === null || resultDB === void 0 ? void 0 : resultDB.error)) {
+                    const resultSpotify = yield instances_2.ISpotifyAPIManager.getSongById({ id });
+                    if (!resultSpotify || (resultSpotify === null || resultSpotify === void 0 ? void 0 : resultSpotify.error))
+                        throw new Error("Song not found");
+                    const dataMapped = yield this.mapSongData(resultSpotify);
+                    return dataMapped;
+                }
+                return resultDB;
+            }
+            catch (error) {
+                console.error(error);
+                throw new Error(`An error occurred while searching for the song. Error: ${error}`);
+            }
+        });
+    }
     static getSongByGenre(_a) {
         return __awaiter(this, arguments, void 0, function* ({ genres, page = 1, limit = 5, }) {
             try {

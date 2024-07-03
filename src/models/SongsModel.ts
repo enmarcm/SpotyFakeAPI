@@ -160,6 +160,28 @@ class SongsModel {
     }
   }
 
+  static async getSongById(id: string){
+    try {
+      const resultDB = await ITSGooseHandler.searchId({
+        Model: SongModel,
+        id
+      });
+
+      if(!resultDB || resultDB?.length === 0 || resultDB?.error){
+        const resultSpotify = await ISpotifyAPIManager.getSongById({id});
+
+        if(!resultSpotify || resultSpotify?.error) throw new Error("Song not found");
+        const dataMapped = await this.mapSongData(resultSpotify);
+        return dataMapped;
+      }
+
+      return resultDB;
+    } catch (error) {
+      console.error(error)
+      throw new Error(`An error occurred while searching for the song. Error: ${error}`);
+    }
+  }
+
   static async getSongByGenre({
     genres,
     page = 1,

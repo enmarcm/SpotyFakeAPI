@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import PlaylistModelClass from "../models/PlaylistModelClass";
+import SongsModel from "../models/SongsModel";
 
 class PlaylistController {
   static async createPlaylist(req: Request, res: Response) {
@@ -35,7 +36,20 @@ class PlaylistController {
 
       const playlist = await PlaylistModelClass.getPlaylistById({ id });
 
-      return res.json(playlist);
+      const playlistSongs = playlist.idSongs.map(async (idSong: string) => {
+        const song = await SongsModel.getSongById(idSong);
+
+        console.log(song);
+
+        return song;
+      });
+
+      const mappedItemPlaylist = {
+        ...playlist,
+        songs: playlistSongs,
+      };
+
+      return res.json(mappedItemPlaylist);
     } catch (error) {
       console.error(error);
       return res.status(500).json({
@@ -99,11 +113,9 @@ class PlaylistController {
         id: req.params.idPlaylist,
       });
 
-      console.log(playlistData)
+      console.log(playlistData);
       if (playlistData.idUser !== idUser)
         return res.status(401).json({ error: "Unauthorized" });
-
-      
 
       if (!idPlaylist)
         return res.status(400).json({ error: "Playlist ID is required" });
