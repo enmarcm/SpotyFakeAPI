@@ -1,6 +1,6 @@
 //TODO: AGREGAR VALIDACIONES QUE YA SE CREAERON
 //TODO: AL USUARIO LE FALTA EL ROL
-import { prop, Ref } from "@typegoose/typegoose";
+import { modelOptions, prop, Ref, Severity } from "@typegoose/typegoose";
 import { UserValidations } from "./schemasValidations";
 
 export class User {
@@ -144,6 +144,18 @@ export class Album {
   public idArtist!: Ref<Artist>[];
 }
 
+@modelOptions({
+  schemaOptions: {
+    toJSON: {
+      transform: (_doc, ret) => {
+        ret.id = ret._id.toString();
+        delete ret._id;
+        delete ret.__v;
+      },
+    },
+  },
+  options: { allowMixed: Severity.ALLOW }, // Solo si necesitas permitir tipos mixtos en tu esquema
+})
 export class Playlist {
   @prop({ ref: () => Song, required: true, type: Array<String> })
   public idSongs!: Ref<Song>[];

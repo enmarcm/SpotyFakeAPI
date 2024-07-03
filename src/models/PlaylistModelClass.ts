@@ -30,6 +30,7 @@ class PlaylistModelClass {
       const result = ITSGooseHandler.searchOne({
         condition: { _id: id },
         Model: PlaylistModel,
+        
       });
       return result;
     } catch (error) {

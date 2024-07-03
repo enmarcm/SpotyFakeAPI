@@ -159,8 +159,8 @@ __decorate([
 __decorate([
     (0, typegoose_1.prop)({ ref: () => Artist, required: true, type: [String] })
 ], Album.prototype, "idArtist", void 0);
-class Playlist {
-}
+let Playlist = class Playlist {
+};
 exports.Playlist = Playlist;
 __decorate([
     (0, typegoose_1.prop)({ ref: () => Song, required: true, type: (Array) })
@@ -177,3 +177,17 @@ __decorate([
 __decorate([
     (0, typegoose_1.prop)({ required: false, type: String })
 ], Playlist.prototype, "urlQr", void 0);
+exports.Playlist = Playlist = __decorate([
+    (0, typegoose_1.modelOptions)({
+        schemaOptions: {
+            toJSON: {
+                transform: (_doc, ret) => {
+                    ret.id = ret._id.toString();
+                    delete ret._id;
+                    delete ret.__v;
+                },
+            },
+        },
+        options: { allowMixed: typegoose_1.Severity.ALLOW }, // Solo si necesitas permitir tipos mixtos en tu esquema
+    })
+], Playlist);
