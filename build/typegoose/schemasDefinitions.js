@@ -188,6 +188,5 @@ exports.Playlist = Playlist = __decorate([
                 },
             },
         },
-        options: { allowMixed: typegoose_1.Severity.ALLOW }, // Solo si necesitas permitir tipos mixtos en tu esquema
     })
 ], Playlist);
