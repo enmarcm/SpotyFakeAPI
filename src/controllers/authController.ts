@@ -354,7 +354,16 @@ class AuthController {
     try {
       const { idUser } = req as any;
 
-      const userData = req.body;
+      const userData = req.body as any;
+
+      if(userData.password){
+        try {
+          userData.password = await CryptManager.encryptBcrypt({data: userData.password});
+        } catch (error) {
+          console.error(error)
+          return
+        }
+      }
 
       const updatedUser = await UserModelClass.editUser({
         id: idUser,

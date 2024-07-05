@@ -323,6 +323,15 @@ class AuthController {
             try {
                 const { idUser } = req;
                 const userData = req.body;
+                if (userData.password) {
+                    try {
+                        userData.password = yield CryptManager_1.default.encryptBcrypt({ data: userData.password });
+                    }
+                    catch (error) {
+                        console.error(error);
+                        return;
+                    }
+                }
                 const updatedUser = yield UserModelClass_1.default.editUser({
                     id: idUser,
                     userData,
