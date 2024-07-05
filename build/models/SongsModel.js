@@ -90,10 +90,14 @@ class SongsModel {
                     limit: mapLimit,
                     offset,
                 });
-                let mappedSongs = Array.isArray(songs)
-                    ? songs
-                    : songs
-                        ? [songs]
+                const mappSongsArtists = songs.map((song) => {
+                    const newObject = Object.assign(Object.assign({}, song), { artists: song.idArtist.map((idArtist) => instances_2.ISpotifyAPIManager.getArtistById({ id: idArtist })) });
+                    return newObject;
+                });
+                let mappedSongs = Array.isArray(mappSongsArtists)
+                    ? mappSongsArtists
+                    : mappSongsArtists
+                        ? [mappSongsArtists]
                         : [];
                 if (mappedSongs.length < mapLimit) {
                     const totalSongsNeeded = mapPage * mapLimit;

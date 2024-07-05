@@ -118,10 +118,19 @@ class SongsModel {
         offset,
       });
 
-      let mappedSongs: any = Array.isArray(songs)
-        ? songs
-        : songs
-        ? [songs]
+      const mappSongsArtists = songs.map((song: any)=>{
+        const newObject = {
+          ...song,
+          artists: song.idArtist.map((idArtist: any) => ISpotifyAPIManager.getArtistById({id: idArtist}))
+        }
+
+        return newObject
+      });
+
+      let mappedSongs: any = Array.isArray(mappSongsArtists)
+        ? mappSongsArtists
+        : mappSongsArtists
+        ? [mappSongsArtists]
         : [];
 
       if (mappedSongs.length < mapLimit) {
