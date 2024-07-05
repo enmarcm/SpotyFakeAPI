@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const SongsModel_1 = __importDefault(require("../models/SongsModel"));
-const UserModelClass_1 = __importDefault(require("../models/UserModelClass"));
+// import UserModelClass from "../models/UserModelClass";
 const instances_1 = require("../data/instances");
 class SongsController {
     static getSongByName(req, res) {
@@ -44,14 +44,12 @@ class SongsController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { name, albumName, duration, urlImage, urlSong, date } = req.body;
-                const { role, idUser } = req;
-                if (role === "user")
+                const { role, idArtist } = req;
+                if (role === "user" || !idArtist)
                     return res
                         .status(401)
                         .json({ error: "You don't have permission to add a song" });
                 //Obtener id de artista del user
-                const userInfo = yield UserModelClass_1.default.getUserInfo({ idUser });
-                const { idArtist } = userInfo;
                 //TODO AQUI HAY QUE CAMBIAR LA DURACION
                 if (!name || !idArtist || !albumName || !duration || !urlSong)
                     return res.status(400).json({ error: "All fields are required" });

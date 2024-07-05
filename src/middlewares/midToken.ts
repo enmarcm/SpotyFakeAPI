@@ -9,6 +9,7 @@ interface Request extends ExpressRequest {
   username?: string;
   email?: string;
   role?: string;
+  idArtist?: string;
 }
 
 export default async function midToken(
@@ -31,7 +32,7 @@ export default async function midToken(
 
     const { id } = decodedToken;
 
-    const user = await UserModelClass.searchUserId({ id });
+    const user = (await UserModelClass.searchUserId({ id })) as any;
 
     if (!user) return res.status(401).json({ message: "User not found" });
 
@@ -43,6 +44,10 @@ export default async function midToken(
     req.username = user.userName;
     req.email = user.email;
     req.role = user.role;
+
+    if (user?.idArtist) {
+      req.idArtist = user.idArtist as any;
+    }
 
     return next();
   } catch (error) {

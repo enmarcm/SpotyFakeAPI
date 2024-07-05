@@ -26,7 +26,7 @@ function midToken(req, res, next) {
             if (!token || !decodedToken.id)
                 res.status(401).json({ message: "Token not found" });
             const { id } = decodedToken;
-            const user = yield UserModelClass_1.default.searchUserId({ id });
+            const user = (yield UserModelClass_1.default.searchUserId({ id }));
             if (!user)
                 return res.status(401).json({ message: "User not found" });
             if (!token) {
@@ -36,6 +36,9 @@ function midToken(req, res, next) {
             req.username = user.userName;
             req.email = user.email;
             req.role = user.role;
+            if (user === null || user === void 0 ? void 0 : user.idArtist) {
+                req.idArtist = user.idArtist;
+            }
             return next();
         }
         catch (error) {

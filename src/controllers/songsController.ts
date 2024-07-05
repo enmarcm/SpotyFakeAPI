@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import SongsModel from "../models/SongsModel";
-import UserModelClass from "../models/UserModelClass";
+// import UserModelClass from "../models/UserModelClass";
 import { ISpotifyAPIManager } from "../data/instances";
 
 class SongsController {
@@ -34,18 +34,14 @@ class SongsController {
       const { name, albumName, duration, urlImage, urlSong, date } =
         req.body as any;
 
-      const { role, idUser } = req as any;
+      const { role, idArtist } = req as any;
 
-      if (role === "user")
+      if (role === "user" || !idArtist)
         return res
           .status(401)
           .json({ error: "You don't have permission to add a song" });
 
       //Obtener id de artista del user
-      const userInfo = await UserModelClass.getUserInfo({ idUser });
-
-      const { idArtist } = userInfo;
-
       //TODO AQUI HAY QUE CAMBIAR LA DURACION
       if (!name || !idArtist || !albumName || !duration || !urlSong)
         return res.status(400).json({ error: "All fields are required" });
