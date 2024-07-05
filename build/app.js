@@ -18,7 +18,7 @@ app.use(middlewares_1.midNotJson);
 app.use(middlewares_1.midConnectDB);
 //!TODO: Colocar de nuevo los tokens
 //{ Routes
-app.use(enums_1.Routes.AUTH, middlewares_1.midToken, allRouters_1.default.authRouter);
+app.use(enums_1.Routes.AUTH, allRouters_1.default.authRouter);
 app.use(enums_1.Routes.SONGS, middlewares_1.midToken, allRouters_1.default.songRouter);
 app.use(enums_1.Routes.PLAYLIST, middlewares_1.midToken, allRouters_1.default.playlistRouter);
 app.use(enums_1.Routes.PROFILE, middlewares_1.midToken, allRouters_1.default.profileRouter);

@@ -61,7 +61,7 @@ class SongsController {
                     urlSong,
                     urlImage,
                     date,
-                    idUser
+                    idUser,
                 });
                 return res.json(song);
             }
@@ -150,30 +150,59 @@ class SongsController {
                 const { idSong } = req.params;
                 if (!idSong)
                     return res.status(400).json({ error: "Song id is required" });
-                const song = yield instances_1.ISpotifyAPIManager.getSongById({ id: idSong });
+                const song = yield SongsModel_1.default.getSongById(idSong);
+                console.log(`AQII ESTAA:`);
                 console.log(song);
-                const mappedSong = {
-                    name: song.name,
-                    id: song.id,
-                    duration_ms: song.duration_ms,
-                    urlImage: song.album.images[0].url,
-                    url_song: song.preview_url ||
-                        "https://p.scdn.co/mp3-preview/23de3926689af61772c7ccb7c7110b1f4643ddf4?cid=cfe923b2d660439caf2b557b21f31221",
-                    artists: yield Promise.all(song.artists.map((artist) => instances_1.ISpotifyAPIManager.getArtistById({ id: artist.id }))).then((artistsInfo) => artistsInfo.map((artistInfo) => ({
-                        id: artistInfo.id,
-                        name: artistInfo.name,
-                        followers: artistInfo.followers.total,
-                        genres: artistInfo.genres,
-                        urlImage: artistInfo.images[0].url,
-                    }))),
-                    album: {
-                        name: song.album.name,
+                if (song) {
+                    const mappedSong = {
+                        id: song._id,
+                        urlImage: song.urlImage,
+                        name: song.name,
+                        duration: song.duration,
+                        date: song.date,
+                        url_song: song.urlSong,
+                        artists: yield Promise.all(song.idArtist.map((artist) => instances_1.ISpotifyAPIManager.getArtistById({ id: artist }))).then((artistsInfo) => artistsInfo.map((artistInfo) => ({
+                            id: artistInfo.id,
+                            name: artistInfo.name,
+                            followers: artistInfo.followers.total,
+                            genres: artistInfo.genres,
+                            urlImage: artistInfo.images[0].url,
+                        }))),
+                        album: {
+                            name: song.name,
+                            urlImage: song.urlImage,
+                            id: song._id,
+                            date: song.date,
+                        },
+                    };
+                    return res.json(mappedSong);
+                }
+                else {
+                    const song = yield instances_1.ISpotifyAPIManager.getSongById({ id: idSong });
+                    console.log(song);
+                    const mappedSong = {
+                        name: song.name,
+                        id: song.id,
+                        duration_ms: song.duration_ms,
                         urlImage: song.album.images[0].url,
-                        id: song.album.id,
-                    },
-                    date: song.album.release_date,
-                };
-                return res.json(mappedSong);
+                        url_song: song.preview_url ||
+                            "https://p.scdn.co/mp3-preview/23de3926689af61772c7ccb7c7110b1f4643ddf4?cid=cfe923b2d660439caf2b557b21f31221",
+                        artists: yield Promise.all(song.artists.map((artist) => instances_1.ISpotifyAPIManager.getArtistById({ id: artist.id }))).then((artistsInfo) => artistsInfo.map((artistInfo) => ({
+                            id: artistInfo.id,
+                            name: artistInfo.name,
+                            followers: artistInfo.followers.total,
+                            genres: artistInfo.genres,
+                            urlImage: artistInfo.images[0].url,
+                        }))),
+                        album: {
+                            name: song.album.name,
+                            urlImage: song.album.images[0].url,
+                            id: song.album.id,
+                        },
+                        date: song.album.release_date,
+                    };
+                    return res.json(mappedSong);
+                }
             }
             catch (error) {
                 console.error(error);

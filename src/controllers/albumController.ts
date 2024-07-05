@@ -31,7 +31,6 @@ class AlbumController {
             songs: mappedAlbumSongs,
           };
 
-          console.log(objectResult);
           return objectResult;
         })
       );

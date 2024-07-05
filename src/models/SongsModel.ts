@@ -394,7 +394,6 @@ class SongsModel {
         data: {_id, idArtist, name, duration, urlSong, urlImage, date, albumName },
       });
 
-      console.log(song)
       return song;
     } catch (error) {
       console.error(error);

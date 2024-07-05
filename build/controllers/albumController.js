@@ -36,7 +36,6 @@ class AlbumController {
                         artists: item.artists,
                         songs: mappedAlbumSongs,
                     };
-                    console.log(objectResult);
                     return objectResult;
                 })));
                 const newMappedResult = yield mappedResult;

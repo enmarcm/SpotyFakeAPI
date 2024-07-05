@@ -25,7 +25,7 @@ app.use(midConnectDB);
 
 //!TODO: Colocar de nuevo los tokens
 //{ Routes
-app.use(Routes.AUTH, midToken, R.authRouter);
+app.use(Routes.AUTH, R.authRouter);
 app.use(Routes.SONGS, midToken, R.songRouter);
 app.use(Routes.PLAYLIST, midToken, R.playlistRouter);
 app.use(Routes.PROFILE, midToken, R.profileRouter);

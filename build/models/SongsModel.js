@@ -295,7 +295,6 @@ class SongsModel {
                     Model: models_1.SongModel,
                     data: { _id, idArtist, name, duration, urlSong, urlImage, date, albumName },
                 });
-                console.log(song);
                 return song;
             }
             catch (error) {
