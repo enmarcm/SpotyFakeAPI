@@ -41,7 +41,7 @@ export class User {
   @prop({ required: false, type: String, default: "user" })
   public role!: string;
 
-  @prop({ required: false, type: Number, default: 3 })
+  @prop({ required: false, type: Number, default: 10000 })
   public attempts!: number;
 
   @prop({ required: false, type: Boolean, default: false })

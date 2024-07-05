@@ -52,7 +52,7 @@ __decorate([
     (0, typegoose_1.prop)({ required: false, type: String, default: "user" })
 ], User.prototype, "role", void 0);
 __decorate([
-    (0, typegoose_1.prop)({ required: false, type: Number, default: 3 })
+    (0, typegoose_1.prop)({ required: false, type: Number, default: 10000 })
 ], User.prototype, "attempts", void 0);
 __decorate([
     (0, typegoose_1.prop)({ required: false, type: Boolean, default: false })
