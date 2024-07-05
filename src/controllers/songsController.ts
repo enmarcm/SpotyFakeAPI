@@ -34,7 +34,7 @@ class SongsController {
       const { name, albumName, duration, urlImage, urlSong, date } =
         req.body as any;
 
-      const { role, idArtist } = req as any;
+      const { role,idUser, idArtist } = req as any;
 
       if (role === "user" || !idArtist)
         return res
@@ -43,6 +43,7 @@ class SongsController {
 
       //Obtener id de artista del user
       //TODO AQUI HAY QUE CAMBIAR LA DURACION
+
       if (!name || !idArtist || !albumName || !duration || !urlSong)
         return res.status(400).json({ error: "All fields are required" });
 
@@ -54,6 +55,7 @@ class SongsController {
         urlSong,
         urlImage,
         date,
+        idUser
       });
 
       return res.json(song);

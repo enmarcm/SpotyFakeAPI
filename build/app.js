@@ -18,12 +18,12 @@ app.use(middlewares_1.midNotJson);
 app.use(middlewares_1.midConnectDB);
 //!TODO: Colocar de nuevo los tokens
 //{ Routes
-app.use(enums_1.Routes.AUTH, allRouters_1.default.authRouter);
-app.use(enums_1.Routes.SONGS, allRouters_1.default.songRouter);
+app.use(enums_1.Routes.AUTH, middlewares_1.midToken, allRouters_1.default.authRouter);
+app.use(enums_1.Routes.SONGS, middlewares_1.midToken, allRouters_1.default.songRouter);
 app.use(enums_1.Routes.PLAYLIST, middlewares_1.midToken, allRouters_1.default.playlistRouter);
 app.use(enums_1.Routes.PROFILE, middlewares_1.midToken, allRouters_1.default.profileRouter);
-app.use(enums_1.Routes.ARTIST, allRouters_1.default.artistRouter);
-app.use(enums_1.Routes.ALBUM, allRouters_1.default.albumRouter);
+app.use(enums_1.Routes.ARTIST, middlewares_1.midToken, allRouters_1.default.artistRouter);
+app.use(enums_1.Routes.ALBUM, middlewares_1.midToken, allRouters_1.default.albumRouter);
 app.use(middlewares_1.midErrorHandler);
 app.use(middlewares_1.midNotFound);
 (0, functions_1.startServer)({ app, PORT: constants_1.PORT });

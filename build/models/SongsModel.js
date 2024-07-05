@@ -18,6 +18,7 @@ const instances_2 = require("../data/instances");
 const ArtistsModelClass_1 = __importDefault(require("./ArtistsModelClass"));
 const UserModelClass_1 = __importDefault(require("./UserModelClass"));
 const PlaylistModelClass_1 = __importDefault(require("./PlaylistModelClass"));
+const CryptManager_1 = __importDefault(require("../utils/CryptManager"));
 class SongsModel {
     static addSongsApiToDB(_a) {
         return __awaiter(this, arguments, void 0, function* ({ name, genres, limit = 10, }) {
@@ -284,15 +285,17 @@ class SongsModel {
         });
     }
     static addSong(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ name, idArtist, albumName, duration, urlSong = "https://p.scdn.co/mp3-preview/23de3926689af61772c7ccb7c7110b1f4643ddf4?cid=cfe923b2d660439caf2b557b21f31221", urlImage = "https://i.scdn.co/image/ab67616d0000b273e63232b00577a053120ca08f", date, }) {
+        return __awaiter(this, arguments, void 0, function* ({ name, idArtist, albumName, duration, urlSong = "https://p.scdn.co/mp3-preview/23de3926689af61772c7ccb7c7110b1f4643ddf4?cid=cfe923b2d660439caf2b557b21f31221", urlImage = "https://i.scdn.co/image/ab67616d0000b273e63232b00577a053120ca08f", date, idUser }) {
             try {
-                const userArtist = yield UserModelClass_1.default.getUserInfo({ idUser: idArtist });
+                const userArtist = yield UserModelClass_1.default.getUserInfo({ idUser });
                 if (!userArtist.idArtist)
                     throw new Error("User is not an artist");
+                const _id = CryptManager_1.default.generateRandom();
                 const song = yield instances_1.ITSGooseHandler.addDocument({
                     Model: models_1.SongModel,
-                    data: { idArtist, name, duration, urlSong, urlImage, date, albumName },
+                    data: { _id, idArtist, name, duration, urlSong, urlImage, date, albumName },
                 });
+                console.log(song);
                 return song;
             }
             catch (error) {

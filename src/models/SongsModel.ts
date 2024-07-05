@@ -10,6 +10,7 @@ import {
 import ArtistModelClass from "./ArtistsModelClass";
 import UserModelClass from "./UserModelClass";
 import PlaylistModelClass from "./PlaylistModelClass";
+import CryptManager from "../utils/CryptManager";
 
 class SongsModel {
   static async addSongsApiToDB({
@@ -380,16 +381,20 @@ class SongsModel {
     urlSong = "https://p.scdn.co/mp3-preview/23de3926689af61772c7ccb7c7110b1f4643ddf4?cid=cfe923b2d660439caf2b557b21f31221",
     urlImage = "https://i.scdn.co/image/ab67616d0000b273e63232b00577a053120ca08f",
     date,
+    idUser
   }: AddSongModelType) {
     try {
-      const userArtist = await UserModelClass.getUserInfo({ idUser: idArtist });
+      const userArtist = await UserModelClass.getUserInfo({ idUser });
       if (!userArtist.idArtist) throw new Error("User is not an artist");
 
+      const _id = CryptManager.generateRandom()
+      
       const song = await ITSGooseHandler.addDocument({
         Model: SongModel,
-        data: { idArtist, name, duration, urlSong, urlImage, date, albumName },
+        data: {_id, idArtist, name, duration, urlSong, urlImage, date, albumName },
       });
 
+      console.log(song)
       return song;
     } catch (error) {
       console.error(error);

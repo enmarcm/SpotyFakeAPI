@@ -44,7 +44,7 @@ class SongsController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { name, albumName, duration, urlImage, urlSong, date } = req.body;
-                const { role, idArtist } = req;
+                const { role, idUser, idArtist } = req;
                 if (role === "user" || !idArtist)
                     return res
                         .status(401)
@@ -61,6 +61,7 @@ class SongsController {
                     urlSong,
                     urlImage,
                     date,
+                    idUser
                 });
                 return res.json(song);
             }

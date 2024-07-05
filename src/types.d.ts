@@ -211,6 +211,7 @@ export interface AddSongModelType {
   urlSong: string;
   urlImage: string;
   date: Date;
+  idUser: string;
 }
 
 export interface DeleteSongType {
