@@ -153,7 +153,7 @@ class AuthController {
       });
     } catch (error) {
       console.error(`Error registering user: ${error}`);
-      return res.status(400).json({ error: (error as Error).message });
+      return res.status(500).json({ error: (error as Error).message });
     }
   }
 
@@ -376,6 +376,7 @@ class AuthController {
   public static async getUserInfo(req: Request, res: Response) {
     try {
       const { idUser } = req as any; 
+      console.log(idUser)
 
       // Fetch user information based on idUser
       const userInfo = await UserModelClass.getUserInfo({ idUser });

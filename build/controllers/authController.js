@@ -139,7 +139,7 @@ class AuthController {
             }
             catch (error) {
                 console.error(`Error registering user: ${error}`);
-                return res.status(400).json({ error: error.message });
+                return res.status(500).json({ error: error.message });
             }
         });
     }
@@ -343,6 +343,7 @@ class AuthController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { idUser } = req;
+                console.log(idUser);
                 // Fetch user information based on idUser
                 const userInfo = yield UserModelClass_1.default.getUserInfo({ idUser });
                 // Check if userInfo exists
