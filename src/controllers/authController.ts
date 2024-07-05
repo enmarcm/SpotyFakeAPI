@@ -72,17 +72,28 @@ class AuthController {
   }): Promise<Boolean> {
     try {
       const htmlContent = `
-        <div style="text-align: center; font-family: Arial, sans-serif;">
-          <h1 style="color: #008080;">YouConnect</h1>
-          <p style="font-size: 1.2em;">Thank you for registering with us!</p>
-          <p style="font-size: 1.2em;">Please click the button below to activate your account.</p>
-          <a href="${URLS.ACTIVATE_USER}/${code}" style="display: inline-block; background-color: #008080; color: #ffffff; padding: 10px 20px; text-decoration: none; font-size: 1.5em; margin: 20px auto; border-radius: 5px;">Activate Account</a>
-        </div>
+        <div style="text-align: center; font-family: Arial, sans-serif; background-color: #191414; color: #1DB954; padding: 20px; border-radius: 10px;">
+  <h1 style="color: #1DB954;">SpotyFake</h1>
+  <p style="font-size: 1.2em;">Thank you for registering with us!</p>
+  <p style="font-size: 1.2em;">Please click the button below to activate your account.</p>
+  <a href="${URLS.ACTIVATE_USER}/${code}" 
+     style="display: inline-block; background-color: #1DB954; color: #191414; padding: 10px 20px; text-decoration: none; font-size: 1.5em; margin: 20px auto; border-radius: 5px; transition: background-color 0.3s, color 0.3s;">
+    Activate Account
+  </a>
+</div>
+
+<style>
+  a:hover {
+    background-color: #191414;
+    color: #1DB954;
+    border: 2px solid #1DB954;
+  }
+</style>
       `;
 
       INodeMailer.sendMailHtml({
         to: userData.email,
-        subject: "Activate your account",
+        subject: "Activate your account - SPOTYFAKE",
         html: htmlContent,
       });
 
@@ -356,12 +367,14 @@ class AuthController {
 
       const userData = req.body as any;
 
-      if(userData.password){
+      if (userData.password) {
         try {
-          userData.password = await CryptManager.encryptBcrypt({data: userData.password});
+          userData.password = await CryptManager.encryptBcrypt({
+            data: userData.password,
+          });
         } catch (error) {
-          console.error(error)
-          return
+          console.error(error);
+          return;
         }
       }
 
@@ -384,8 +397,8 @@ class AuthController {
 
   public static async getUserInfo(req: Request, res: Response) {
     try {
-      const { idUser } = req as any; 
-      console.log(idUser)
+      const { idUser } = req as any;
+      console.log(idUser);
 
       // Fetch user information based on idUser
       const userInfo = await UserModelClass.getUserInfo({ idUser });
@@ -399,7 +412,11 @@ class AuthController {
       return res.status(200).json(userInfo);
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ error: "An error occurred while fetching the user information." });
+      return res
+        .status(500)
+        .json({
+          error: "An error occurred while fetching the user information.",
+        });
     }
   }
 }
