@@ -8,6 +8,8 @@ class PlaylistController {
       const { idUser } = req as any;
       const { name, description, idSongs } = req.body;
 
+      console.log(name, description, idSongs, idUser)
+
       if (!name || !idUser)
         return res.status(400).json({ error: "Name and user ID are required" });
 
