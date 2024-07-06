@@ -109,7 +109,7 @@ class SongsController {
           urlImage: song.album.images[0].url,
           urlSong:
             song.preview_url ||
-            "https://p.scdn.co/mp3-preview/23de3926689af61772c7ccb7c7110b1f4643ddf4?cid=cfe923b2d660439caf2b557b21f31221",
+            "https://firebasestorage.googleapis.com/v0/b/spotyfake-4453c.appspot.com/o/uploads%2FRingtone.mp3?alt=media&token=f8e9556a-4119-4a9c-b283-f289edc1f731",
           artists: song.artists.map((artist: any) => ({
             id: artist.id,
             name: artist.name,
