@@ -10,24 +10,23 @@ class LikesModelClass {
     idSong: string;
   }) {
     try {
-      // Buscar si ya existe un like del usuario para la canción
       const existingLike = await ITSGooseHandler.searchOne({
         Model: LikeModel,
         condition: { idUser, idSong },
       });
 
       if (existingLike) {
-        // Si existe, eliminar el like (deslikear)
         await ITSGooseHandler.removeDocument({
           Model: LikeModel,
           id: existingLike._id,
         });
         return { message: "Song unliked successfully" };
       } else {
-        // Si no existe, agregar el like
-        await ITSGooseHandler.addDocument({
+
+        const data = {idUser, idSong}
+         await ITSGooseHandler.addDocument({
           Model: LikeModel,
-          data: { idUser, idSong },
+          data,
         });
         return { message: "Song liked successfully" };
       }

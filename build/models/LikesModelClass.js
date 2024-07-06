@@ -15,13 +15,11 @@ class LikesModelClass {
     static toggleLikeSong(_a) {
         return __awaiter(this, arguments, void 0, function* ({ idUser, idSong, }) {
             try {
-                // Buscar si ya existe un like del usuario para la canción
                 const existingLike = yield instances_1.ITSGooseHandler.searchOne({
                     Model: models_1.LikeModel,
                     condition: { idUser, idSong },
                 });
                 if (existingLike) {
-                    // Si existe, eliminar el like (deslikear)
                     yield instances_1.ITSGooseHandler.removeDocument({
                         Model: models_1.LikeModel,
                         id: existingLike._id,
@@ -29,10 +27,10 @@ class LikesModelClass {
                     return { message: "Song unliked successfully" };
                 }
                 else {
-                    // Si no existe, agregar el like
+                    const data = { idUser, idSong };
                     yield instances_1.ITSGooseHandler.addDocument({
                         Model: models_1.LikeModel,
-                        data: { idUser, idSong },
+                        data,
                     });
                     return { message: "Song liked successfully" };
                 }

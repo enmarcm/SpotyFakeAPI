@@ -19,8 +19,9 @@ class LikeController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { idUser } = req;
-                const { idSong } = req.body;
+                const { idSong } = req.params;
                 const response = yield LikesModelClass_1.default.toggleLikeSong({ idUser, idSong });
+                console.log(response);
                 return res.json(response);
             }
             catch (error) {

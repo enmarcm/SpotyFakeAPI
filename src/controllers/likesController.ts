@@ -6,8 +6,10 @@ class LikeController {
   static async toggleLikeSong(req: Request, res: Response) {
     try {
       const { idUser } = req as any;
-      const { idSong } = req.body;
+      const { idSong } = req.params;
+
       const response = await LikesModelClass.toggleLikeSong({ idUser, idSong });
+      console.log(response)
       return res.json(response);
     } catch (error) {
       console.error("Error toggling like on song:", error);
