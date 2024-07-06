@@ -84,23 +84,24 @@ class SongsModel {
                 const mapLimit = Math.max(limit, 1);
                 const offset = (mapPage - 1) * mapLimit;
                 const mappedName = name.replace("%", " ");
-                let songs = yield instances_1.ITSGooseHandler.searchAll({
+                let songs = (yield instances_1.ITSGooseHandler.searchAll({
                     Model: models_1.SongModel,
                     condition: { name: { $regex: mappedName, $options: "i" } },
                     limit: mapLimit,
                     offset,
-                });
-                const mappSongsArtists = (songs) => __awaiter(this, void 0, void 0, function* () {
-                    const songsWithArtists = yield Promise.all(songs.map((song) => __awaiter(this, void 0, void 0, function* () {
-                        const artists = yield Promise.all(song.idArtist.map((idArtist) => instances_2.ISpotifyAPIManager.getArtistById({ id: idArtist })));
-                        return Object.assign(Object.assign({}, song), { artists });
-                    })));
-                    return songsWithArtists;
-                });
-                let mappedSongs = Array.isArray(mappSongsArtists)
-                    ? mappSongsArtists
-                    : mappSongsArtists
-                        ? [mappSongsArtists]
+                }));
+                const [newSongsDB] = songs ? songs : [];
+                const newSongDBJSON = newSongsDB ? [newSongsDB.toJSON()] : [];
+                const songsWithArtists = yield Promise.all(newSongDBJSON.map((song) => __awaiter(this, void 0, void 0, function* () {
+                    if (!song)
+                        return;
+                    const artists = yield Promise.all(song.idArtist.map((idArtist) => instances_2.ISpotifyAPIManager.getArtistById({ id: idArtist })));
+                    return Object.assign(Object.assign({}, song), { artists, _id: song.id, artistNames: [artists[0].name] });
+                })));
+                let mappedSongs = Array.isArray(songsWithArtists)
+                    ? songsWithArtists
+                    : songsWithArtists
+                        ? [songsWithArtists]
                         : [];
                 if (mappedSongs.length < mapLimit) {
                     const totalSongsNeeded = mapPage * mapLimit;

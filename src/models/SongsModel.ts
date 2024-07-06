@@ -111,37 +111,42 @@ class SongsModel {
 
       const mappedName = name.replace("%", " ");
 
-      let songs = await ITSGooseHandler.searchAll({
+      let songs = (await ITSGooseHandler.searchAll({
         Model: SongModel,
         condition: { name: { $regex: mappedName, $options: "i" } },
         limit: mapLimit,
         offset,
-      });
+      })) as any;
 
-      const mappSongsArtists = async (songs: any[]) => {
-        const songsWithArtists = await Promise.all(
-          songs.map(async (song: any) => {
-            const artists = await Promise.all(
-              song.idArtist.map((idArtist: any) =>
-                ISpotifyAPIManager.getArtistById({ id: idArtist })
-              )
-            );
+      const [newSongsDB] = songs ? songs : [];
+    
+      const newSongDBJSON = newSongsDB ? [newSongsDB.toJSON()] : [];
 
-            return {
-              ...song,
-              artists,
-            };
-          })
-        );
+      const songsWithArtists = await Promise.all(
+        newSongDBJSON.map(async (song: any) => {
+          if(!song) return
+          const artists = await Promise.all(
+            song.idArtist.map((idArtist: any) =>
+              ISpotifyAPIManager.getArtistById({ id: idArtist })
+            )
+          );
 
-        return songsWithArtists;
-      };
+          return {
+            ...song,
+            artists,
+            _id: song.id,
+            artistNames: [artists[0].name],
+          };
+        })
+      );
 
-      let mappedSongs: any = Array.isArray(mappSongsArtists)
-        ? mappSongsArtists
-        : mappSongsArtists
-        ? [mappSongsArtists]
+
+      let mappedSongs: any = Array.isArray(songsWithArtists)
+        ? songsWithArtists
+        : songsWithArtists
+        ? [songsWithArtists]
         : [];
+
 
       if (mappedSongs.length < mapLimit) {
         const totalSongsNeeded = mapPage * mapLimit;
