@@ -118,14 +118,24 @@ class SongsModel {
         offset,
       });
 
-      const mappSongsArtists = songs.map((song: any)=>{
-        const newObject = {
-          ...song,
-          artists: song.idArtist.map((idArtist: any) => ISpotifyAPIManager.getArtistById({id: idArtist}))
-        }
+      const mappSongsArtists = async (songs: any[]) => {
+        const songsWithArtists = await Promise.all(
+          songs.map(async (song: any) => {
+            const artists = await Promise.all(
+              song.idArtist.map((idArtist: any) =>
+                ISpotifyAPIManager.getArtistById({ id: idArtist })
+              )
+            );
 
-        return newObject
-      });
+            return {
+              ...song,
+              artists,
+            };
+          })
+        );
+
+        return songsWithArtists;
+      };
 
       let mappedSongs: any = Array.isArray(mappSongsArtists)
         ? mappSongsArtists
@@ -170,25 +180,28 @@ class SongsModel {
     }
   }
 
-  static async getSongById(id: string){
+  static async getSongById(id: string) {
     try {
       const resultDB = await ITSGooseHandler.searchId({
         Model: SongModel,
-        id
+        id,
       });
 
-      if(!resultDB || resultDB?.length === 0 || resultDB?.error){
-        const resultSpotify = await ISpotifyAPIManager.getSongById({id});
+      if (!resultDB || resultDB?.length === 0 || resultDB?.error) {
+        const resultSpotify = await ISpotifyAPIManager.getSongById({ id });
 
-        if(!resultSpotify || resultSpotify?.error) throw new Error("Song not found");
+        if (!resultSpotify || resultSpotify?.error)
+          throw new Error("Song not found");
         const dataMapped = await this.mapSongData(resultSpotify);
         return dataMapped;
       }
 
       return resultDB;
     } catch (error) {
-      console.error(error)
-      throw new Error(`An error occurred while searching for the song. Error: ${error}`);
+      console.error(error);
+      throw new Error(
+        `An error occurred while searching for the song. Error: ${error}`
+      );
     }
   }
 
@@ -310,8 +323,9 @@ class SongsModel {
               });
 
               if (!existingArtist) {
-
-                const artistData = await ISpotifyAPIManager.getArtistInfoById(artist.id);
+                const artistData = await ISpotifyAPIManager.getArtistInfoById(
+                  artist.id
+                );
 
                 if (!artistData) {
                   console.log("No se encontró información del artista.");
@@ -322,7 +336,9 @@ class SongsModel {
                   id: artist.id,
                   name: artist.name,
                   dateOfJoin: new Date(),
-                  urlImage: artistData.images[0]?.url || "https://lastfm.freetls.fastly.net/i/u/770x0/dd90f6548472acf19dd781ef269b9d62.jpg#dd90f6548472acf19dd781ef269b9d62"
+                  urlImage:
+                    artistData.images[0]?.url ||
+                    "https://lastfm.freetls.fastly.net/i/u/770x0/dd90f6548472acf19dd781ef269b9d62.jpg#dd90f6548472acf19dd781ef269b9d62",
                 }).catch((error) => console.error(error)); // Manejo de errores en caso de que la promesa sea rechazada
               }
             })
@@ -390,17 +406,26 @@ class SongsModel {
     urlSong = "https://p.scdn.co/mp3-preview/23de3926689af61772c7ccb7c7110b1f4643ddf4?cid=cfe923b2d660439caf2b557b21f31221",
     urlImage = "https://i.scdn.co/image/ab67616d0000b273e63232b00577a053120ca08f",
     date,
-    idUser
+    idUser,
   }: AddSongModelType) {
     try {
       const userArtist = await UserModelClass.getUserInfo({ idUser });
       if (!userArtist.idArtist) throw new Error("User is not an artist");
 
-      const _id = CryptManager.generateRandom()
-      
+      const _id = CryptManager.generateRandom();
+
       const song = await ITSGooseHandler.addDocument({
         Model: SongModel,
-        data: {_id, idArtist, name, duration, urlSong, urlImage, date, albumName },
+        data: {
+          _id,
+          idArtist,
+          name,
+          duration,
+          urlSong,
+          urlImage,
+          date,
+          albumName,
+        },
       });
 
       return song;

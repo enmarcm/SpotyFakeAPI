@@ -102,8 +102,8 @@ __decorate([
 __decorate([
     (0, typegoose_1.prop)({ ref: () => User, required: true, type: String })
 ], Subscription.prototype, "idUser", void 0);
-class Song {
-}
+let Song = class Song {
+};
 exports.Song = Song;
 __decorate([
     (0, typegoose_1.prop)({ required: true, type: String })
@@ -135,6 +135,19 @@ __decorate([
 __decorate([
     (0, typegoose_1.prop)({ required: false, type: String })
 ], Song.prototype, "albumName", void 0);
+exports.Song = Song = __decorate([
+    (0, typegoose_1.modelOptions)({
+        schemaOptions: {
+            toJSON: {
+                transform: (_doc, ret) => {
+                    ret.id = ret._id.toString();
+                    delete ret._id;
+                    delete ret.__v;
+                },
+            },
+        },
+    })
+], Song);
 class Like {
 }
 exports.Like = Like;

@@ -90,9 +90,12 @@ class SongsModel {
                     limit: mapLimit,
                     offset,
                 });
-                const mappSongsArtists = songs.map((song) => {
-                    const newObject = Object.assign(Object.assign({}, song), { artists: song.idArtist.map((idArtist) => instances_2.ISpotifyAPIManager.getArtistById({ id: idArtist })) });
-                    return newObject;
+                const mappSongsArtists = (songs) => __awaiter(this, void 0, void 0, function* () {
+                    const songsWithArtists = yield Promise.all(songs.map((song) => __awaiter(this, void 0, void 0, function* () {
+                        const artists = yield Promise.all(song.idArtist.map((idArtist) => instances_2.ISpotifyAPIManager.getArtistById({ id: idArtist })));
+                        return Object.assign(Object.assign({}, song), { artists });
+                    })));
+                    return songsWithArtists;
                 });
                 let mappedSongs = Array.isArray(mappSongsArtists)
                     ? mappSongsArtists
@@ -130,7 +133,7 @@ class SongsModel {
             try {
                 const resultDB = yield instances_1.ITSGooseHandler.searchId({
                     Model: models_1.SongModel,
-                    id
+                    id,
                 });
                 if (!resultDB || (resultDB === null || resultDB === void 0 ? void 0 : resultDB.length) === 0 || (resultDB === null || resultDB === void 0 ? void 0 : resultDB.error)) {
                     const resultSpotify = yield instances_2.ISpotifyAPIManager.getSongById({ id });
@@ -240,7 +243,8 @@ class SongsModel {
                                 id: artist.id,
                                 name: artist.name,
                                 dateOfJoin: new Date(),
-                                urlImage: ((_a = artistData.images[0]) === null || _a === void 0 ? void 0 : _a.url) || "https://lastfm.freetls.fastly.net/i/u/770x0/dd90f6548472acf19dd781ef269b9d62.jpg#dd90f6548472acf19dd781ef269b9d62"
+                                urlImage: ((_a = artistData.images[0]) === null || _a === void 0 ? void 0 : _a.url) ||
+                                    "https://lastfm.freetls.fastly.net/i/u/770x0/dd90f6548472acf19dd781ef269b9d62.jpg#dd90f6548472acf19dd781ef269b9d62",
                             }).catch((error) => console.error(error)); // Manejo de errores en caso de que la promesa sea rechazada
                         }
                     })));
@@ -289,7 +293,7 @@ class SongsModel {
         });
     }
     static addSong(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ name, idArtist, albumName, duration, urlSong = "https://p.scdn.co/mp3-preview/23de3926689af61772c7ccb7c7110b1f4643ddf4?cid=cfe923b2d660439caf2b557b21f31221", urlImage = "https://i.scdn.co/image/ab67616d0000b273e63232b00577a053120ca08f", date, idUser }) {
+        return __awaiter(this, arguments, void 0, function* ({ name, idArtist, albumName, duration, urlSong = "https://p.scdn.co/mp3-preview/23de3926689af61772c7ccb7c7110b1f4643ddf4?cid=cfe923b2d660439caf2b557b21f31221", urlImage = "https://i.scdn.co/image/ab67616d0000b273e63232b00577a053120ca08f", date, idUser, }) {
             try {
                 const userArtist = yield UserModelClass_1.default.getUserInfo({ idUser });
                 if (!userArtist.idArtist)
@@ -297,7 +301,16 @@ class SongsModel {
                 const _id = CryptManager_1.default.generateRandom();
                 const song = yield instances_1.ITSGooseHandler.addDocument({
                     Model: models_1.SongModel,
-                    data: { _id, idArtist, name, duration, urlSong, urlImage, date, albumName },
+                    data: {
+                        _id,
+                        idArtist,
+                        name,
+                        duration,
+                        urlSong,
+                        urlImage,
+                        date,
+                        albumName,
+                    },
                 });
                 return song;
             }

@@ -90,6 +90,17 @@ export class Subscription {
   public idUser!: Ref<User>;
 }
 
+@modelOptions({
+  schemaOptions: {
+    toJSON: {
+      transform: (_doc, ret) => {
+        ret.id = ret._id.toString();
+        delete ret._id;
+        delete ret.__v;
+      },
+    },
+  },
+})
 export class Song {
   @prop({ required: true, type: String })
   public _id!: string;
