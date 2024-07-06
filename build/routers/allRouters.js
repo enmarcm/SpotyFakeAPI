@@ -10,6 +10,7 @@ const songRouter_1 = __importDefault(require("./songRouter"));
 const artistRouter_1 = __importDefault(require("./artistRouter"));
 const playlistRouter_1 = __importDefault(require("./playlistRouter"));
 const albumRouter_1 = __importDefault(require("./albumRouter"));
+const likesRouter_1 = __importDefault(require("./likesRouter"));
 exports.default = {
     artistRouter: artistRouter_1.default,
     authRouter: authRouter_1.default,
@@ -18,4 +19,5 @@ exports.default = {
     songRouter: songRouter_1.default,
     playlistRouter: playlistRouter_1.default,
     albumRouter: albumRouter_1.default,
+    likesRouter: likesRouter_1.default
 };

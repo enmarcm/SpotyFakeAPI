@@ -3,6 +3,17 @@
 import { modelOptions, prop, Ref } from "@typegoose/typegoose";
 import { UserValidations } from "./schemasValidations";
 
+@modelOptions({
+  schemaOptions: {
+    toJSON: {
+      transform: (_doc, ret) => {
+        ret.id = ret._id.toString();
+        delete ret._id;
+        delete ret.__v;
+      },
+    },
+  },
+})
 export class User {
   @prop({
     required: true,
@@ -54,6 +65,17 @@ export class User {
   public idArtist?: string;
 }
 
+@modelOptions({
+  schemaOptions: {
+    toJSON: {
+      transform: (_doc, ret) => {
+        ret.id = ret._id.toString();
+        delete ret._id;
+        delete ret.__v;
+      },
+    },
+  },
+})
 export class ActivateCode {
   @prop({ required: true, type: String })
   public code!: string;
@@ -68,6 +90,17 @@ export class ActivateCode {
   public expireAt?: Date;
 }
 
+@modelOptions({
+  schemaOptions: {
+    toJSON: {
+      transform: (_doc, ret) => {
+        ret.id = ret._id.toString();
+        delete ret._id;
+        delete ret.__v;
+      },
+    },
+  },
+})
 export class Artist {
   @prop({ required: true, type: String })
   public _id!: string;
@@ -82,6 +115,17 @@ export class Artist {
   public urlImage?: string;
 }
 
+@modelOptions({
+  schemaOptions: {
+    toJSON: {
+      transform: (_doc, ret) => {
+        ret.id = ret._id.toString();
+        delete ret._id;
+        delete ret.__v;
+      },
+    },
+  },
+})
 export class Subscription {
   @prop({ ref: () => Artist, required: true, type: String })
   public idArtist!: Ref<Artist>;
@@ -133,6 +177,17 @@ export class Song {
   public albumName?: string;
 }
 
+@modelOptions({
+  schemaOptions: {
+    toJSON: {
+      transform: (_doc, ret) => {
+        ret.id = ret._id.toString();
+        delete ret._id;
+        delete ret.__v;
+      },
+    },
+  },
+})
 export class Like {
   @prop({ ref: () => User, required: true, type: String })
   public idUser!: Ref<User>;
@@ -141,6 +196,17 @@ export class Like {
   public idSong!: Ref<Song>;
 }
 
+@modelOptions({
+  schemaOptions: {
+    toJSON: {
+      transform: (_doc, ret) => {
+        ret.id = ret._id.toString();
+        delete ret._id;
+        delete ret.__v;
+      },
+    },
+  },
+})
 export class Album {
   @prop({ required: true, type: String })
   public _id!: string;

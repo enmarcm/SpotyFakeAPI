@@ -24,6 +24,7 @@ app.use(enums_1.Routes.PLAYLIST, middlewares_1.midToken, allRouters_1.default.pl
 app.use(enums_1.Routes.PROFILE, middlewares_1.midToken, allRouters_1.default.profileRouter);
 app.use(enums_1.Routes.ARTIST, middlewares_1.midToken, allRouters_1.default.artistRouter);
 app.use(enums_1.Routes.ALBUM, middlewares_1.midToken, allRouters_1.default.albumRouter);
+app.use(enums_1.Routes.LIKES, middlewares_1.midToken, allRouters_1.default.likesRouter);
 app.use(middlewares_1.midErrorHandler);
 app.use(middlewares_1.midNotFound);
 (0, functions_1.startServer)({ app, PORT: constants_1.PORT });

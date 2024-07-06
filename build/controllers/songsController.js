@@ -15,11 +15,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const SongsModel_1 = __importDefault(require("../models/SongsModel"));
 // import UserModelClass from "../models/UserModelClass";
 const instances_1 = require("../data/instances");
+const LikesModelClass_1 = __importDefault(require("../models/LikesModelClass"));
 class SongsController {
     static getSongByName(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // revisar
+                const { idUser } = req;
                 const { songName } = req.params;
                 const page = parseInt(req.query.page) || 1;
                 const limit = parseInt(req.query.limit) || 15;
@@ -30,7 +31,14 @@ class SongsController {
                     page,
                     limit,
                 });
-                return res.json(songs);
+                const parsedSongs = yield Promise.all(songs.map((song) => __awaiter(this, void 0, void 0, function* () {
+                    const isLiked = yield LikesModelClass_1.default.verifySongLikedByUser({
+                        idUser,
+                        idSong: song._id,
+                    });
+                    return Object.assign(Object.assign({}, song), { isLiked });
+                })));
+                return res.json(parsedSongs);
             }
             catch (error) {
                 console.error(error);

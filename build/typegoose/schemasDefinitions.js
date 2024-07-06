@@ -11,8 +11,8 @@ exports.Playlist = exports.Album = exports.Like = exports.Song = exports.Subscri
 //TODO: AL USUARIO LE FALTA EL ROL
 const typegoose_1 = require("@typegoose/typegoose");
 const schemasValidations_1 = require("./schemasValidations");
-class User {
-}
+let User = class User {
+};
 exports.User = User;
 __decorate([
     (0, typegoose_1.prop)({
@@ -63,8 +63,21 @@ __decorate([
 __decorate([
     (0, typegoose_1.prop)({ required: false, type: String })
 ], User.prototype, "idArtist", void 0);
-class ActivateCode {
-}
+exports.User = User = __decorate([
+    (0, typegoose_1.modelOptions)({
+        schemaOptions: {
+            toJSON: {
+                transform: (_doc, ret) => {
+                    ret.id = ret._id.toString();
+                    delete ret._id;
+                    delete ret.__v;
+                },
+            },
+        },
+    })
+], User);
+let ActivateCode = class ActivateCode {
+};
 exports.ActivateCode = ActivateCode;
 __decorate([
     (0, typegoose_1.prop)({ required: true, type: String })
@@ -78,8 +91,21 @@ __decorate([
 __decorate([
     (0, typegoose_1.prop)({ expires: 12000, type: Date })
 ], ActivateCode.prototype, "expireAt", void 0);
-class Artist {
-}
+exports.ActivateCode = ActivateCode = __decorate([
+    (0, typegoose_1.modelOptions)({
+        schemaOptions: {
+            toJSON: {
+                transform: (_doc, ret) => {
+                    ret.id = ret._id.toString();
+                    delete ret._id;
+                    delete ret.__v;
+                },
+            },
+        },
+    })
+], ActivateCode);
+let Artist = class Artist {
+};
 exports.Artist = Artist;
 __decorate([
     (0, typegoose_1.prop)({ required: true, type: String })
@@ -93,8 +119,21 @@ __decorate([
 __decorate([
     (0, typegoose_1.prop)({ required: false, type: String })
 ], Artist.prototype, "urlImage", void 0);
-class Subscription {
-}
+exports.Artist = Artist = __decorate([
+    (0, typegoose_1.modelOptions)({
+        schemaOptions: {
+            toJSON: {
+                transform: (_doc, ret) => {
+                    ret.id = ret._id.toString();
+                    delete ret._id;
+                    delete ret.__v;
+                },
+            },
+        },
+    })
+], Artist);
+let Subscription = class Subscription {
+};
 exports.Subscription = Subscription;
 __decorate([
     (0, typegoose_1.prop)({ ref: () => Artist, required: true, type: String })
@@ -102,6 +141,19 @@ __decorate([
 __decorate([
     (0, typegoose_1.prop)({ ref: () => User, required: true, type: String })
 ], Subscription.prototype, "idUser", void 0);
+exports.Subscription = Subscription = __decorate([
+    (0, typegoose_1.modelOptions)({
+        schemaOptions: {
+            toJSON: {
+                transform: (_doc, ret) => {
+                    ret.id = ret._id.toString();
+                    delete ret._id;
+                    delete ret.__v;
+                },
+            },
+        },
+    })
+], Subscription);
 let Song = class Song {
 };
 exports.Song = Song;
@@ -148,8 +200,8 @@ exports.Song = Song = __decorate([
         },
     })
 ], Song);
-class Like {
-}
+let Like = class Like {
+};
 exports.Like = Like;
 __decorate([
     (0, typegoose_1.prop)({ ref: () => User, required: true, type: String })
@@ -157,8 +209,21 @@ __decorate([
 __decorate([
     (0, typegoose_1.prop)({ ref: () => Song, required: true, type: String })
 ], Like.prototype, "idSong", void 0);
-class Album {
-}
+exports.Like = Like = __decorate([
+    (0, typegoose_1.modelOptions)({
+        schemaOptions: {
+            toJSON: {
+                transform: (_doc, ret) => {
+                    ret.id = ret._id.toString();
+                    delete ret._id;
+                    delete ret.__v;
+                },
+            },
+        },
+    })
+], Like);
+let Album = class Album {
+};
 exports.Album = Album;
 __decorate([
     (0, typegoose_1.prop)({ required: true, type: String })
@@ -172,6 +237,19 @@ __decorate([
 __decorate([
     (0, typegoose_1.prop)({ ref: () => Artist, required: true, type: [String] })
 ], Album.prototype, "idArtist", void 0);
+exports.Album = Album = __decorate([
+    (0, typegoose_1.modelOptions)({
+        schemaOptions: {
+            toJSON: {
+                transform: (_doc, ret) => {
+                    ret.id = ret._id.toString();
+                    delete ret._id;
+                    delete ret.__v;
+                },
+            },
+        },
+    })
+], Album);
 let Playlist = class Playlist {
 };
 exports.Playlist = Playlist;

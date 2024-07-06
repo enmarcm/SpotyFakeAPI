@@ -8,6 +8,7 @@ export enum Routes {
   PLAYLIST = "/playlist",
   ARTIST = "/artist",
   ALBUM = "/album",
+  LIKES = "/likes",
 }
 
 export const URLS = {

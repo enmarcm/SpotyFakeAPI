@@ -5,6 +5,7 @@ import songRouter from "./songRouter";
 import artistRouter from "./artistRouter";
 import playlistRouter from "./playlistRouter";
 import albumRouter from "./albumRouter";
+import likesRouter from "./likesRouter";
 
 export default {
   artistRouter,
@@ -14,4 +15,5 @@ export default {
   songRouter,
   playlistRouter,
   albumRouter,
+  likesRouter
 };

@@ -2,11 +2,12 @@ import { Request, Response } from "express";
 import SongsModel from "../models/SongsModel";
 // import UserModelClass from "../models/UserModelClass";
 import { ISpotifyAPIManager } from "../data/instances";
+import LikesModelClass from "../models/LikesModelClass";
 
 class SongsController {
   static async getSongByName(req: Request, res: Response) {
     try {
-      // revisar
+      const { idUser } = req as any;
       const { songName } = req.params;
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 15;
@@ -20,7 +21,19 @@ class SongsController {
         limit,
       });
 
-      return res.json(songs);
+      const parsedSongs = await Promise.all(songs.map(async (song: any) => {
+        const isLiked = await LikesModelClass.verifySongLikedByUser({
+          idUser,
+          idSong: song._id,
+        });
+      
+        return {
+          ...song,
+          isLiked,
+        };
+      }));
+
+      return res.json(parsedSongs);
     } catch (error) {
       console.error(error);
       return res.status(500).json({
@@ -153,7 +166,7 @@ class SongsController {
 
       const song = await SongsModel.getSongById(idSong);
       console.log(`AQII ESTAA:`);
-      console.log(song)
+      console.log(song);
 
       if (song) {
         const mappedSong = {
@@ -182,7 +195,7 @@ class SongsController {
             id: song._id,
             date: song.date,
           },
-        }
+        };
         return res.json(mappedSong);
       } else {
         const song = await ISpotifyAPIManager.getSongById({ id: idSong });

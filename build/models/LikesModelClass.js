@@ -43,5 +43,54 @@ class LikesModelClass {
             }
         });
     }
+    static getLikesByUser(_a) {
+        return __awaiter(this, arguments, void 0, function* ({ idUser }) {
+            try {
+                console.log(idUser);
+                // Buscar todos los likes del usuario
+                const likes = yield instances_1.ITSGooseHandler.searchAll({
+                    Model: models_1.LikeModel,
+                    condition: { idUser },
+                });
+                return likes;
+            }
+            catch (error) {
+                console.error("Error getting likes by user:", error);
+                throw error;
+            }
+        });
+    }
+    static getLikesBySong(_a) {
+        return __awaiter(this, arguments, void 0, function* ({ idSong }) {
+            try {
+                // Buscar todos los likes de la canción
+                const likes = yield instances_1.ITSGooseHandler.searchAll({
+                    Model: models_1.LikeModel,
+                    condition: { idSong },
+                });
+                return likes;
+            }
+            catch (error) {
+                console.error("Error getting likes by song:", error);
+                throw error;
+            }
+        });
+    }
+    static verifySongLikedByUser(_a) {
+        return __awaiter(this, arguments, void 0, function* ({ idUser, idSong, }) {
+            try {
+                // Buscar si el usuario ya le dio like a la canción
+                const existingLike = yield instances_1.ITSGooseHandler.searchOne({
+                    Model: models_1.LikeModel,
+                    condition: { idUser, idSong },
+                });
+                return !!existingLike;
+            }
+            catch (error) {
+                console.error("Error verifying song liked by user:", error);
+                throw error;
+            }
+        });
+    }
 }
 exports.default = LikesModelClass;

@@ -11,6 +11,7 @@ var Routes;
     Routes["PLAYLIST"] = "/playlist";
     Routes["ARTIST"] = "/artist";
     Routes["ALBUM"] = "/album";
+    Routes["LIKES"] = "/likes";
 })(Routes || (exports.Routes = Routes = {}));
 exports.URLS = {
     MAIN: constants_1.BASE_URL,
