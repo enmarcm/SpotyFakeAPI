@@ -56,9 +56,9 @@ class LikeController {
                         name: song.name,
                         duration: song.duration,
                         date: song.date,
-                        url_song: song.urlSong,
+                        urlSong: song.urlSong,
                         artists,
-                        artisNames: artists.map((artist) => artist.name),
+                        artistName: artists.map((artist) => artist.name),
                         idArtist: song.idArtist,
                     };
                 })));

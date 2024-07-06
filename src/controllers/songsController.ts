@@ -161,83 +161,60 @@ class SongsController {
     try {
       const { idSong } = req.params;
       const { idUser } = req as any;
-
-      if (!idSong)
+  
+      if (!idSong) {
         return res.status(400).json({ error: "Song id is required" });
-
-      const song = await SongsModel.getSongById(idSong);
-      console.log(`AQII ESTAA:`);
-      console.log(song);
-
-      if (song) {
-        const mappedSong = {
-          id: song._id,
-          urlImage: song.urlImage,
-          name: song.name,
-          duration: song.duration,
-          date: song.date,
-          url_song: song.urlSong,
-          artists: await Promise.all(
-            song.idArtist.map((artist: any) =>
-              ISpotifyAPIManager.getArtistById({ id: artist })
-            )
-          ).then((artistsInfo) =>
-            artistsInfo.map((artistInfo: any) => ({
-              id: artistInfo.id,
-              name: artistInfo.name,
-              followers: artistInfo.followers.total,
-              genres: artistInfo.genres,
-              urlImage: artistInfo.images[0].url,
-            }))
-          ),
-          album: {
-            name: song.name,
-            urlImage: song.urlImage,
-            id: song._id,
-            date: song.date,
-          },
-          isLiked: await LikesModelClass.verifySongLikedByUser({idUser, idSong: song._id})
-        };
-        return res.json(mappedSong);
-      } else {
-        const song = await ISpotifyAPIManager.getSongById({ id: idSong });
-
-        console.log(song);
-
-        const mappedSong = {
-          name: song.name,
-          id: song.id,
-          duration_ms: song.duration_ms,
-          urlImage: song.album.images[0].url,
-          url_song:
-            song.preview_url ||
-            "https://p.scdn.co/mp3-preview/23de3926689af61772c7ccb7c7110b1f4643ddf4?cid=cfe923b2d660439caf2b557b21f31221",
-          artists: await Promise.all(
-            song.artists.map((artist: any) =>
-              ISpotifyAPIManager.getArtistById({ id: artist.id })
-            )
-          ).then((artistsInfo) =>
-            artistsInfo.map((artistInfo: any) => ({
-              id: artistInfo.id,
-              name: artistInfo.name,
-              followers: artistInfo.followers.total,
-              genres: artistInfo.genres,
-              urlImage: artistInfo.images[0].url,
-            }))
-          ),
-          album: {
-            name: song.album.name,
-            urlImage: song.album.images[0].url,
-            id: song.album.id,
-          },
-          date: song.album.release_date,
-          isLiked: await LikesModelClass.verifySongLikedByUser({idUser, idSong: song.id})
-        };
-
-        return res.json(mappedSong);
       }
+  
+      let song;
+      try {
+        song = await SongsModel.getSongById(idSong);
+      } catch (dbError) {
+        console.error(`Error fetching song from DB: ${dbError}`);
+      }
+  
+      if (!song) {
+        try {
+          song = await ISpotifyAPIManager.getSongById({ id: idSong });
+        } catch (apiError) {
+          console.error(`Error fetching song from Spotify API: ${apiError}`);
+          return res.status(404).json({ error: "Song not found" });
+        }
+      }
+  
+      const artists = await Promise.all(
+        (song.idArtist || song.artists).map(async (artist: any) => {
+          const artistInfo = await ISpotifyAPIManager.getArtistById({ id: artist.id || artist });
+          return {
+            id: artistInfo.id,
+            name: artistInfo.name,
+            followers: artistInfo.followers.total,
+            genres: artistInfo.genres,
+            urlImage: artistInfo.images[0]?.url,
+          };
+        })
+      );
+  
+      const mappedSong = {
+        id: song._id || song.id,
+        urlImage: song.urlImage || song.album.images[0]?.url,
+        name: song.name,
+        duration: song.duration || song.duration_ms,
+        date: song.date || song.album.release_date,
+        url_song: song.urlSong || song.preview_url || "https://p.scdn.co/mp3-preview/23de3926689af61772c7ccb7c7110b1f4643ddf4?cid=cfe923b2d660439caf2b557b21f31221",
+        artists,
+        album: {
+          name: song.album?.name || song.name,
+          urlImage: song.album?.images[0]?.url || song.urlImage,
+          id: song.album?.id || song._id,
+          date: song.album?.release_date || song.date,
+        },
+        isLiked: await LikesModelClass.verifySongLikedByUser({ idUser, idSong: song._id || song.id })
+      };
+  
+      return res.json(mappedSong);
     } catch (error) {
-      console.error(error);
+      console.error(`An error occurred while searching for the song. Error: ${error}`);
       return res.status(500).json({
         error: `An error occurred while searching for the song. Error: ${error}`,
       });

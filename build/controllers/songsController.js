@@ -154,69 +154,60 @@ class SongsController {
     }
     static getSongById(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b, _c, _d, _e, _f;
             try {
                 const { idSong } = req.params;
                 const { idUser } = req;
-                if (!idSong)
+                if (!idSong) {
                     return res.status(400).json({ error: "Song id is required" });
-                const song = yield SongsModel_1.default.getSongById(idSong);
-                console.log(`AQII ESTAA:`);
-                console.log(song);
-                if (song) {
-                    const mappedSong = {
-                        id: song._id,
-                        urlImage: song.urlImage,
-                        name: song.name,
-                        duration: song.duration,
-                        date: song.date,
-                        url_song: song.urlSong,
-                        artists: yield Promise.all(song.idArtist.map((artist) => instances_1.ISpotifyAPIManager.getArtistById({ id: artist }))).then((artistsInfo) => artistsInfo.map((artistInfo) => ({
-                            id: artistInfo.id,
-                            name: artistInfo.name,
-                            followers: artistInfo.followers.total,
-                            genres: artistInfo.genres,
-                            urlImage: artistInfo.images[0].url,
-                        }))),
-                        album: {
-                            name: song.name,
-                            urlImage: song.urlImage,
-                            id: song._id,
-                            date: song.date,
-                        },
-                        isLiked: yield LikesModelClass_1.default.verifySongLikedByUser({ idUser, idSong: song._id })
-                    };
-                    return res.json(mappedSong);
                 }
-                else {
-                    const song = yield instances_1.ISpotifyAPIManager.getSongById({ id: idSong });
-                    console.log(song);
-                    const mappedSong = {
-                        name: song.name,
-                        id: song.id,
-                        duration_ms: song.duration_ms,
-                        urlImage: song.album.images[0].url,
-                        url_song: song.preview_url ||
-                            "https://p.scdn.co/mp3-preview/23de3926689af61772c7ccb7c7110b1f4643ddf4?cid=cfe923b2d660439caf2b557b21f31221",
-                        artists: yield Promise.all(song.artists.map((artist) => instances_1.ISpotifyAPIManager.getArtistById({ id: artist.id }))).then((artistsInfo) => artistsInfo.map((artistInfo) => ({
-                            id: artistInfo.id,
-                            name: artistInfo.name,
-                            followers: artistInfo.followers.total,
-                            genres: artistInfo.genres,
-                            urlImage: artistInfo.images[0].url,
-                        }))),
-                        album: {
-                            name: song.album.name,
-                            urlImage: song.album.images[0].url,
-                            id: song.album.id,
-                        },
-                        date: song.album.release_date,
-                        isLiked: yield LikesModelClass_1.default.verifySongLikedByUser({ idUser, idSong: song.id })
-                    };
-                    return res.json(mappedSong);
+                let song;
+                try {
+                    song = yield SongsModel_1.default.getSongById(idSong);
                 }
+                catch (dbError) {
+                    console.error(`Error fetching song from DB: ${dbError}`);
+                }
+                if (!song) {
+                    try {
+                        song = yield instances_1.ISpotifyAPIManager.getSongById({ id: idSong });
+                    }
+                    catch (apiError) {
+                        console.error(`Error fetching song from Spotify API: ${apiError}`);
+                        return res.status(404).json({ error: "Song not found" });
+                    }
+                }
+                const artists = yield Promise.all((song.idArtist || song.artists).map((artist) => __awaiter(this, void 0, void 0, function* () {
+                    var _g;
+                    const artistInfo = yield instances_1.ISpotifyAPIManager.getArtistById({ id: artist.id || artist });
+                    return {
+                        id: artistInfo.id,
+                        name: artistInfo.name,
+                        followers: artistInfo.followers.total,
+                        genres: artistInfo.genres,
+                        urlImage: (_g = artistInfo.images[0]) === null || _g === void 0 ? void 0 : _g.url,
+                    };
+                })));
+                const mappedSong = {
+                    id: song._id || song.id,
+                    urlImage: song.urlImage || ((_a = song.album.images[0]) === null || _a === void 0 ? void 0 : _a.url),
+                    name: song.name,
+                    duration: song.duration || song.duration_ms,
+                    date: song.date || song.album.release_date,
+                    url_song: song.urlSong || song.preview_url || "https://p.scdn.co/mp3-preview/23de3926689af61772c7ccb7c7110b1f4643ddf4?cid=cfe923b2d660439caf2b557b21f31221",
+                    artists,
+                    album: {
+                        name: ((_b = song.album) === null || _b === void 0 ? void 0 : _b.name) || song.name,
+                        urlImage: ((_d = (_c = song.album) === null || _c === void 0 ? void 0 : _c.images[0]) === null || _d === void 0 ? void 0 : _d.url) || song.urlImage,
+                        id: ((_e = song.album) === null || _e === void 0 ? void 0 : _e.id) || song._id,
+                        date: ((_f = song.album) === null || _f === void 0 ? void 0 : _f.release_date) || song.date,
+                    },
+                    isLiked: yield LikesModelClass_1.default.verifySongLikedByUser({ idUser, idSong: song._id || song.id })
+                };
+                return res.json(mappedSong);
             }
             catch (error) {
-                console.error(error);
+                console.error(`An error occurred while searching for the song. Error: ${error}`);
                 return res.status(500).json({
                     error: `An error occurred while searching for the song. Error: ${error}`,
                 });
