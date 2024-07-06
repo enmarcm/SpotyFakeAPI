@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const LikesModelClass_1 = __importDefault(require("../models/LikesModelClass"));
 const SongsModel_1 = __importDefault(require("../models/SongsModel"));
+const instances_1 = require("../data/instances");
 class LikeController {
     static toggleLikeSong(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -41,7 +42,27 @@ class LikeController {
                     const songData = yield SongsModel_1.default.getSongById(like.idSong);
                     return songData;
                 })));
-                return res.json(songsLiked);
+                const newValues = yield Promise.all(songsLiked.map((song) => __awaiter(this, void 0, void 0, function* () {
+                    const artists = yield Promise.all(song.idArtist.map((artist) => __awaiter(this, void 0, void 0, function* () {
+                        const artistData = yield instances_1.ISpotifyAPIManager.getArtistById({ id: artist });
+                        return {
+                            id: artistData.id,
+                            name: artistData.name,
+                        };
+                    })));
+                    return {
+                        id: song._id,
+                        urlImage: song.urlImage,
+                        name: song.name,
+                        duration: song.duration,
+                        date: song.date,
+                        url_song: song.urlSong,
+                        artists,
+                        artisNames: artists.map((artist) => artist.name),
+                        idArtist: song.idArtist,
+                    };
+                })));
+                return res.json(newValues);
             }
             catch (error) {
                 console.error("Error getting likes by user:", error);

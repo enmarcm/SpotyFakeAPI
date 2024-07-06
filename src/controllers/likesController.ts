@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import LikesModelClass from "../models/LikesModelClass";
 import SongsModel from "../models/SongsModel";
+import { ISpotifyAPIManager } from "../data/instances";
 
 class LikeController {
   static async toggleLikeSong(req: Request, res: Response) {
@@ -25,11 +26,35 @@ class LikeController {
       const response = await LikesModelClass.getLikesByUser({ idUser });
 
       const songsLiked = await Promise.all(response.map(async (like: any) => {
-        const songData = await SongsModel.getSongById(like.idSong);
+        const songData = await SongsModel.getSongById(like.idSong)
+
         return songData;
       }));
 
-      return res.json(songsLiked);
+      const newValues = await Promise.all(songsLiked.map(async (song: any) => {
+        const artists = await Promise.all(song.idArtist.map(async (artist: any) => {
+          const artistData = await ISpotifyAPIManager.getArtistById({ id: artist });
+      
+          return {
+            id: artistData.id,
+            name: artistData.name,
+          };
+        }));
+      
+        return {
+          id: song._id,
+          urlImage: song.urlImage,
+          name: song.name,
+          duration: song.duration,
+          date: song.date,
+          url_song: song.urlSong,
+          artists,
+          artisNames: artists.map((artist: any) => artist.name),
+          idArtist: song.idArtist,
+        };
+      }));
+
+      return res.json(newValues);
     } catch (error) {
       console.error("Error getting likes by user:", error);
       return res.status(500).json({
