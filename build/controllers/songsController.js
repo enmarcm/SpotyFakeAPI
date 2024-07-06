@@ -156,6 +156,7 @@ class SongsController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { idSong } = req.params;
+                const { idUser } = req;
                 if (!idSong)
                     return res.status(400).json({ error: "Song id is required" });
                 const song = yield SongsModel_1.default.getSongById(idSong);
@@ -182,6 +183,7 @@ class SongsController {
                             id: song._id,
                             date: song.date,
                         },
+                        isLiked: yield LikesModelClass_1.default.verifySongLikedByUser({ idUser, idSong: song._id })
                     };
                     return res.json(mappedSong);
                 }
@@ -208,6 +210,7 @@ class SongsController {
                             id: song.album.id,
                         },
                         date: song.album.release_date,
+                        isLiked: yield LikesModelClass_1.default.verifySongLikedByUser({ idUser, idSong: song.id })
                     };
                     return res.json(mappedSong);
                 }

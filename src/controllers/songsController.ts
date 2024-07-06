@@ -160,6 +160,7 @@ class SongsController {
   static async getSongById(req: Request, res: Response) {
     try {
       const { idSong } = req.params;
+      const { idUser } = req as any;
 
       if (!idSong)
         return res.status(400).json({ error: "Song id is required" });
@@ -195,6 +196,7 @@ class SongsController {
             id: song._id,
             date: song.date,
           },
+          isLiked: await LikesModelClass.verifySongLikedByUser({idUser, idSong: song._id})
         };
         return res.json(mappedSong);
       } else {
@@ -229,6 +231,7 @@ class SongsController {
             id: song.album.id,
           },
           date: song.album.release_date,
+          isLiked: await LikesModelClass.verifySongLikedByUser({idUser, idSong: song.id})
         };
 
         return res.json(mappedSong);
